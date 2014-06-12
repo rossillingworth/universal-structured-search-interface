@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Universal Structured search interface</title>
+    <style>
+
+        select{
+            font-size: large;
+        }
+
+    </style>
+</head>
+<body onload="populateWhere()">
+
+<select id="where" onchange="populateWhat()"></select>
+<select id="what" onchange="populateHow()"></select>
+<select id="how" onchange="populateForm()"></select>
+<div id="query_form">
+    <div class="field_box">
+        <label>First Name</label>
+        <input type="text" id="xxx" >
+    </div>
+</div>
+
+<script>
+
+    // todo: allow field to specify base field to extend?
+    // or always specify all fields, so single point of responsibility
+
+    var data = {
+        where1:{
+            what1:{
+                how1:{
+                    manditory:[
+                        {
+                            type:"textBox",
+                            label:"first name",     // label for field
+                            validation:"",          // validation function / funcName, can be an object / array for multiples
+                            data:"query.firstName"  // where to put data in query
+                        }
+                    ],
+                    optional:[],
+                    postProcess:""                  // function /  function name to pre-process data before sending
+                },
+                how2:{},
+                how3:{}
+            },
+            what2:{},
+            what3:{}
+        },
+        where2:{},
+        where3:{}
+    };
+
+    function populateList(listElement,data){
+        var listElement = JS.DOM.getElement(listElement,true);
+        while(listElement.options.length){
+            listElement.options.remove(0);
+        }
+        JS.DOM.createElement("option",{text:"...."},listElement);
+        _.forEach(data,function(value,key,collection){
+            JS.DOM.createElement("option",{text:key},listElement);
+        });
+    }
+
+    function populateWhere(){
+        populateList("where",data);
+    }
+
+    function populateWhat(){
+        var where = JS.DOM.FORM.getValue("where");
+        populateList("what",data[where]);
+    }
+
+    function populateHow(){
+        var where = JS.DOM.FORM.getValue("where");
+        var what = JS.DOM.FORM.getValue("what");
+        populateList("how",data[where][what]);
+    }
+
+    function populateForm(){
+        var where = JS.DOM.FORM.getValue("where");
+        var what = JS.DOM.FORM.getValue("what");
+        var how = JS.DOM.FORM.getValue("how");
+        var formConfig = data[where][what][how];
+
+        // display manditory fields
+        var formElement = JS.DOM.getElement("query_form",true);
+        _.forEach(data[where][what][how].manditory,function(value,key,collection){
+            var html = _.template(JS.DOM.getElement(value.type).innerHTML,value);
+            JS.DOM.createElement("div",{innerHTML:html},formElement);
+        });
+
+    }
+
+</script>
+<script src="js/lodash.compat.js"></script>
+<script src="js/JS.js"></script>
+
+<script type="text/html" id="textBox">
+    <div>some text {name}</div>
+</script>
+
+</body>
+</html>
