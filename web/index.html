@@ -63,18 +63,26 @@ var formTreeConfig ={
                                             manditory:[
                                                 {
                                                     elementType:"textBox",
-                                                    label:"First Name",     // label for field
-                                                    validation:"",          // validation function / funcName, can be an object / array for multiples
+                                                    label:"First Name",             // label for field
+                                                    validation:"",                  // validation function / funcName, can be an object / array for multiples
                                                     dataLocation:"query.firstName"  // where to put data in query
                                                 },
                                                 {
                                                     elementType:"textBox",
-                                                    label:"Last Name",     // label for field
-                                                    validation:"",          // validation function / funcName, can be an object / array for multiples
-                                                    dataLocation:"query.lastName"  // where to put data in query
+                                                    label:"Last Name",              // label for field
+                                                    validation:"",                  // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation:"query.lastName"   // where to put data in query
                                                 }
                                             ],
-                                            optional:[],
+                                            optional:[
+                                                {
+                                                    id:"SEX",
+                                                    elementType:"textBox",
+                                                    label:"SEX",                // label for field
+                                                    validation:"",              // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation:"query.sex"    // where to put data in query
+                                                }
+                                            ],
                                             postProcess:null
                                         }
                                     }
@@ -236,6 +244,10 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
 </script>
 
 <script type="text/html" id="template.fields">
+    <%
+      var uuid = JS.uuid();
+      var optionalUUID = "optional_"+uuid;
+    %>
     <div class="" style="display: inline-block;border:1px solid red;">
         <div class="" style="display: inline-block;border:1px solid blue;">
             <% _.forEach(data.data.manditory,function(val,key,collection){
@@ -244,8 +256,24 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
                 <%=html%>
             <%});%>
         </div>
+        <div id="<%= optionalUUID %>" class="" style="display: inline-block;border:1px solid yellow;">
+        </div>
+        <%
+        var optionalFieldFuncName = namedAnonymousFunction(function(){
+            var selectedValue = JS.DOM.FORM.getValue(this);
+            var optionalContainer = JS.DOM.getElement(optionalUUID);
+            var d = _.find(data.data.optional,{id:selectedValue});
+            var html = tlf.getTemplate(d.elementType)(d);
+            JS.DOM.createElement("span",{innerHTML:html},optionalContainer);
+        });
+        %>
         <div class="" style="display: inline-block;border:1px solid yellow;">
-
+            <select style="width:20px;font-size: xx-large;" onfocus="this.style.width='';" onblur="this.style.width='20px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
+                <optgroup label="Optional Fields">
+                    <option>Height</option>
+                    <option>SEX</option>
+                </optgroup>
+            </select>
         </div>
     </div>
 </script>
