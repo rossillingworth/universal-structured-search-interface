@@ -25,7 +25,7 @@ if(!window["_"]){
 function Y(f) {
     return (
         (function (x) {return f(function (v) { return x(x)(v); }); })
-            (function (x) {return f(function (v) { return x(x)(v); }); }));
+        (function (x) {return f(function (v) { return x(x)(v); }); }));
 }
 
 
@@ -38,6 +38,16 @@ var JS = {
     ,deprecated:function(name){alert(name + " has been deprecated in favour of underscore");debugger;}
     ,timestamp:function(){return (new Date()).valueOf();}
     ,log:function(msg,lvl){lvl=lvl||5;if (JS.debug && window["console"] && console["log"] && lvl<=JS.debugDetail){console.log(msg);}}
+    /**
+     * Generate a UUID
+     * @returns {string}
+     */
+    ,uuid:function uuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+            return v.toString(16);
+        });
+    }
     ,ASSERT:{
         is:function(exp,expected,message){
             if(!(_.isEqual(exp,expected))){
