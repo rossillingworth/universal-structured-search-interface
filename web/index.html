@@ -10,95 +10,255 @@
 
     </style>
 </head>
-<body onload="populateWhere()">
+<body onload="initTLF('tlf',formTreeConfig,null).start()">
 
-<select id="where" onchange="populateWhat()"></select>
-<select id="what" onchange="populateHow()"></select>
-<select id="how" onchange="populateForm()"></select>
-<div id="query_form">
-    <div class="field_box">
-        <label>First Name</label>
-        <input type="text" id="xxx" >
-    </div>
-</div>
+<div id="tlf"></div>
 
 <script>
 
-    // todo: allow field to specify base field to extend?
-    // or always specify all fields, so single point of responsibility
+// todo: allow field to specify base field to extend?
+// or always specify all fields, so single point of responsibility
 
-    var data = {
-        where1:{
-            what1:{
-                how1:{
-                    manditory:[
-                        {
-                            type:"textBox",
-                            label:"first name",     // label for field
-                            validation:"",          // validation function / funcName, can be an object / array for multiples
-                            data:"query.firstName"  // where to put data in query
+// where -> what -> how
+// Data-src -> ObjectType -> QueryType
+// who where when what why how
+
+// config for prefilters - typeName -> typeName -> typeName
+
+// if type is DDL, display content as DDL: value:text -> id:displayName -> select chooses id
+// process collection fields in order to get data coordinates
+
+var formTreeConfig ={
+    elementType:"ddl",
+    label:"Data-source",
+//        data:[
+//            {
+//                id:"PNC",
+//                label:"PNC",
+//                next:{
+//                    elementType:"ddl",
+//                    label:"What -> Object",
+//                    data:[]
+//                }
+//            }
+//        ],
+    data:{
+        PNC:{
+            label:"PNC",
+            data:{
+                elementType:"ddl",
+                label:"What -> Object",
+                data:{
+                    Nominal:{
+                        label:"Nominal",
+                        data:{
+                            elementType:"ddl",
+                            label:"How -> Query",
+                            data:{
+                                firstNameLastName:{
+                                    label:"by Name",
+                                    data:{
+                                        elementType:"fields",
+                                        data:{
+                                            manditory:[
+                                                {
+                                                    elementType:"textBox",
+                                                    label:"First Name",     // label for field
+                                                    validation:"",          // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation:"query.firstName"  // where to put data in query
+                                                },
+                                                {
+                                                    elementType:"textBox",
+                                                    label:"Last Name",     // label for field
+                                                    validation:"",          // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation:"query.lastName"  // where to put data in query
+                                                }
+                                            ],
+                                            optional:[],
+                                            postProcess:null
+                                        }
+                                    }
+                                },
+                                PNCid:{
+                                    label:"by PNC ID",
+                                    data:{
+                                        elementType:"fields",
+                                        data:{
+                                            manditory:[
+                                                {
+                                                    elementType:"textBox",
+                                                    label:"PNC-Id",     // label for field
+                                                    validation:"",          // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation:"query.pncid"  // where to put data in query
+                                                }
+                                            ],
+                                            optional:[],
+                                            postProcess:null
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    ],
-                    optional:[],
-                    postProcess:""                  // function /  function name to pre-process data before sending
-                },
-                how2:{},
-                how3:{}
-            },
-            what2:{},
-            what3:{}
+                    }
+                }
+            }
         },
-        where2:{},
-        where3:{}
-    };
-
-    function populateList(listElement,data){
-        var listElement = JS.DOM.getElement(listElement,true);
-        while(listElement.options.length){
-            listElement.options.remove(0);
+        POLE:{
+            label:"POLE",
+            data:{
+                elementType:"empty",
+                label:"What -> Object",
+                data:{}
+            }
         }
-        JS.DOM.createElement("option",{text:"...."},listElement);
-        _.forEach(data,function(value,key,collection){
-            JS.DOM.createElement("option",{text:key},listElement);
-        });
     }
+};
 
-    function populateWhere(){
-        populateList("where",data);
+
+
+function initTLF(container,config,callback){
+
+    var choices = [];
+
+    var tlf = {
+        templatePrefix:"template.",
+        templates:{},
+        identifier:"TLF",
+        start:function(){
+            tlf.populate(0,container,config);
+        },
+        // returns a function
+        getTemplate:function(templateName,json){
+            if(tlf.templates[templateName] == undefined){
+                var templateText = JS.DOM.getElement(tlf.templatePrefix + templateName,true).innerHTML;
+                tlf.templates[templateName] = _.template(templateText);
+            }
+            return tlf.templates[templateName];
+        },
+        populate:function(level,element,data){
+            var templateTypeName = data.elementType;
+            var templateFunc = tlf.getTemplate(templateTypeName);
+            var html = templateFunc({
+                tlf:tlf,
+                level:level,
+                data:data
+            });
+            // todo: extend element config with data.config
+            JS.DOM.createElement("span",{class:tlf.identifier,innerHTML:html,style:{display:"inlineBlock"}},element);
+        },
+        prefilterChanged:function(level,value){
+            choices = choices.slice(0,level);
+            choices[level]=value;
+            tlf.clean(level);
+            var d = tlf.getData();
+            tlf.populate(level+1,container,d);
+        },
+        clean:function clean(level){
+            var children = JS.DOM.getElement(container,true).childNodes;
+            var l = children.length -1;
+            while(l > level){
+                children[l].parentNode.removeChild(children[l]);
+                l--;
+            }
+        },
+        getData:function(){
+            var d = config;
+            _.forEach(choices,function(val,key,col){
+                JS.ASSERT.isTrue(_.isObject(d.data[val].data),"missing expected data");
+                d = d.data[val].data;
+            })
+            return d;
+        }
+    };
+    return tlf;
+};
+
+
+
+/**
+ *
+ * @param func
+ * @param storageObject
+ * @param deleteAfterUse
+ * @returns {*}
+ */
+function namedAnonymousFunction(func,storageObject,deleteAfterUse){
+    var f = func;
+    var name = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
+    storageObject = storageObject || window;
+    if(deleteAfterUse){
+        f = function(){
+            var args = Array.prototype.slice.apply(arguments);
+            setTimeout(function(){storageObject[name];},1)
+            return func.apply(this,args);
+        }
     }
+    storageObject[name]=f;
+    return name;
+}
 
-    function populateWhat(){
-        var where = JS.DOM.FORM.getValue("where");
-        populateList("what",data[where]);
-    }
+(function(){
+    var n = namedAnonymousFunction(function(){
+        console.log("f has been run");
+    });
+//    setInterval(window[n],1000);
+})();
 
-    function populateHow(){
-        var where = JS.DOM.FORM.getValue("where");
-        var what = JS.DOM.FORM.getValue("what");
-        populateList("how",data[where][what]);
-    }
-
-    function populateForm(){
-        var where = JS.DOM.FORM.getValue("where");
-        var what = JS.DOM.FORM.getValue("what");
-        var how = JS.DOM.FORM.getValue("how");
-        var formConfig = data[where][what][how];
-
-        // display manditory fields
-        var formElement = JS.DOM.getElement("query_form",true);
-        _.forEach(data[where][what][how].manditory,function(value,key,collection){
-            var html = _.template(JS.DOM.getElement(value.type).innerHTML,value);
-            JS.DOM.createElement("div",{innerHTML:html},formElement);
-        });
-
-    }
 
 </script>
+
 <script src="js/lodash.compat.js"></script>
 <script src="js/JS.js"></script>
 
-<script type="text/html" id="textBox">
-    <div>some text {name}</div>
+
+<script type="text/html" id="template.ddl">
+    <div class="" style="display: inline-block;border:1px solid red;">
+        <input type="hidden" id="level<%=level%>" name="level<%=level%>" value="">
+        <%
+        var funcName = namedAnonymousFunction(function(){
+          var selectedValue = JS.DOM.FORM.getValue(this);
+          JS.DOM.getElement("level"+level).value = selectedValue;
+          tlf.prefilterChanged(level,selectedValue);
+        });
+        console.log("created: "+funcName);
+        %>
+        <label><%=data.label%></label><br/>
+        <select onchange="window['<%=funcName%>'].apply(this);">
+            <option value="<%=data.label%>"><%=data.label%></option>
+            <% _.forEach(data.data,function(val,key,collection){%>
+            <option value="<%=key%>"><%=val.label%></option>
+            <%});%>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" id="template.fields">
+    <div class="" style="display: inline-block;border:1px solid red;">
+        <div class="" style="display: inline-block;border:1px solid blue;">
+            <% _.forEach(data.data.manditory,function(val,key,collection){
+              var html = tlf.getTemplate(val.elementType)(val);
+            %>
+                <%=html%>
+            <%});%>
+        </div>
+        <div class="" style="display: inline-block;border:1px solid yellow;">
+
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="template.textBox">
+    <div class="" style="display: inline-block;border:1px solid red;">
+        <label><%=label%></label><br/>
+        <input type="text" id="<%=dataLocation%>" value="">
+    </div>
+</script>
+
+<script type="text/html" id="template.empty">
+    <div>empty</div>
 </script>
 
 </body>
