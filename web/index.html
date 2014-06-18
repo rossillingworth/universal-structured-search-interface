@@ -10,7 +10,7 @@
 
     </style>
 </head>
-<body onload="initTLF('tlf',formTreeConfig,null).start()">
+<body onload="TLF_Factory('tlf',OmniBoxRoot,null).start()">
 
 <div id="tlf"></div>
 
@@ -28,7 +28,19 @@
 // if type is DDL, display content as DDL: value:text -> id:displayName -> select chooses id
 // process collection fields in order to get data coordinates
 
-var formTreeConfig ={
+// TODO: List -> [{},{},{}]
+
+// TreeRoot -> Node []
+
+var root = {
+    elementType:"ddl",
+    label:"",
+    options:{
+
+    }
+}
+
+var OmniBoxRoot ={
     elementType:"ddl",
     label:"Data-source",
 //        data:[
@@ -43,7 +55,7 @@ var formTreeConfig ={
 //            }
 //        ],
     data:{
-        PNC:{
+        ZNC:{
             label:"ZNC",
             data:{
                 elementType:"ddl",
@@ -83,21 +95,22 @@ var formTreeConfig ={
                                                     dataLocation:"query.sex"    // where to put data in query
                                                 }
                                             ],
+                                            validation:null,
                                             postProcess:null
                                         }
                                     }
                                 },
-                                PNCid:{
-                                    label:"by PNC ID",
+                                ZNCid:{
+                                    label:"by ZNC ID",
                                     data:{
                                         elementType:"fields",
                                         data:{
                                             manditory:[
                                                 {
                                                     elementType:"textBox",
-                                                    label:"PNC-Id",     // label for field
+                                                    label:"ZNC-Id",     // label for field
                                                     validation:"",          // validation function / funcName, can be an object / array for multiples
-                                                    dataLocation:"query.pncid"  // where to put data in query
+                                                    dataLocation:"query.zncid"  // where to put data in query
                                                 }
                                             ],
                                             optional:[],
@@ -111,12 +124,31 @@ var formTreeConfig ={
                 }
             }
         },
-        POLE:{
+        ZOLE:{
             label:"ZOLE",
             data:{
-                elementType:"empty",
-                label:"What -> Object",
-                data:{}
+                elementType:"fields",
+                data:{
+                    manditory:[
+                        {
+                            id:"SEX",
+                            elementType:"textBox",
+                            label:"Zoomba",             // label for field
+                            validation:"",                  // validation function / funcName, can be an object / array for multiples
+                            dataLocation:"query.zoomba"  // where to put data in query
+                        }
+                    ],
+                    optional:[
+                        {
+                            id:"SEX",
+                            elementType:"textBox",
+                            label:"SEX",                // label for field
+                            validation:"",              // validation function / funcName, can be an object / array for multiples
+                            dataLocation:"query.sex"    // where to put data in query
+                        }
+                    ],
+                    postProcess:null
+                }
             }
         }
     }
@@ -124,7 +156,7 @@ var formTreeConfig ={
 
 
 
-function initTLF(container,config,callback){
+function TLF_Factory(container,config,submitCallback){
 
     var choices = [];
 
@@ -222,6 +254,7 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
 <script src="js/JS.js"></script>
 
 
+<!-- TEMPLATE for DROP DOWN LIST-->
 <script type="text/html" id="template.ddl">
     <div class="" style="display: inline-block;border:1px solid red;">
         <input type="hidden" id="level<%=level%>" name="level<%=level%>" value="">
@@ -243,6 +276,7 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
     </div>
 </script>
 
+<!-- TEMPLATE for FORM & FIELDS -->
 <script type="text/html" id="template.fields">
     <%
       var uuid = JS.uuid();
@@ -260,18 +294,24 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
         </div>
         <%
         var optionalFieldFuncName = namedAnonymousFunction(function(){
-            var selectedValue = JS.DOM.FORM.getValue(this);
+            var element = JS.DOM.getElement(this);
+            var selectedValue = JS.DOM.FORM.getValue(element);
+            if(selectedValue =="+")return;
             var optionalContainer = JS.DOM.getElement(optionalUUID);
             var d = _.find(data.data.optional,{id:selectedValue});
             var html = tlf.getTemplate(d.elementType)(d);
-            JS.DOM.createElement("span",{innerHTML:html},optionalContainer);
+            var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
+            element.selectedIndex = 0;
+            element.blur();
         });
         %>
         <div class="" style="display: inline-block;border:1px solid yellow;">
-            <select style="width:20px;font-size: xx-large;" onfocus="this.style.width='';" onblur="this.style.width='20px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
+            <select style="width:50px;font-size: xx-large;" onfocus="this.style.width='200px';" onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
+                <option>+</option>
                 <optgroup label="Optional Fields">
-                    <option>Height</option>
-                    <option>SEX</option>
+                    <% _.forEach(data.data.optional,function(val,key,collection){%>
+                      <option value="<%=val.id%>"><%=val.label%></option>
+                    <%});%>
                 </optgroup>
             </select>
         </div>
