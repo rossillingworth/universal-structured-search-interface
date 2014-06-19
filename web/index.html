@@ -32,13 +32,48 @@
 
 // TreeRoot -> Node []
 
-var root = {
-    elementType:"ddl",
-    label:"",
-    options:{
-
+// TODO: this allows easy reuse and possible override
+var levels = [
+    {
+        id:"DataSrcs",
+        elementType:"ddl",
+        label:"Where - Data Source",
+        options:[
+            {
+                id:"ZNC",
+                label:"ZNC",
+                link:"ZNC_OBJECTS"
+            },{
+                id:"ZOLE",
+                label:"ZOLE"
+            }
+        ]
+    },
+    {
+        id:"ZNC_OBJECTS",
+        elementType:"ddl",
+        label:"What - Object Type",
+        options:[
+            {
+                id:"Nominal",
+                label:"Nominal",
+                link:"ZNC_NOMINAL_QUERIES"
+            }
+        ]
+    },
+    {
+        id:"ZNC_NOMINAL_QUERIES",
+        elementType:"ddl",
+        label:"How - Query Type",
+        options:[
+            {
+                id:"BYNAME",
+                label:"By Name",
+                link:"ZNC_NOMINAL_BYNAME_FORM"
+            }
+        ]
     }
-}
+];
 
 var OmniBoxRoot ={
     elementType:"ddl",
@@ -260,9 +295,9 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
         <input type="hidden" id="level<%=level%>" name="level<%=level%>" value="">
         <%
         var funcName = namedAnonymousFunction(function(){
-          var selectedValue = JS.DOM.FORM.getValue(this);
-          JS.DOM.getElement("level"+level).value = selectedValue;
-          tlf.prefilterChanged(level,selectedValue);
+        var selectedValue = JS.DOM.FORM.getValue(this);
+        JS.DOM.getElement("level"+level).value = selectedValue;
+        tlf.prefilterChanged(level,selectedValue);
         });
         console.log("created: "+funcName);
         %>
@@ -279,30 +314,30 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
 <!-- TEMPLATE for FORM & FIELDS -->
 <script type="text/html" id="template.fields">
     <%
-      var uuid = JS.uuid();
-      var optionalUUID = "optional_"+uuid;
+    var uuid = JS.uuid();
+    var optionalUUID = "optional_"+uuid;
     %>
     <div class="" style="display: inline-block;border:1px solid red;">
         <div class="" style="display: inline-block;border:1px solid blue;">
             <% _.forEach(data.data.manditory,function(val,key,collection){
-              var html = tlf.getTemplate(val.elementType)(val);
+            var html = tlf.getTemplate(val.elementType)(val);
             %>
-                <%=html%>
+            <%=html%>
             <%});%>
         </div>
         <div id="<%= optionalUUID %>" class="" style="display: inline-block;border:1px solid yellow;">
         </div>
         <%
         var optionalFieldFuncName = namedAnonymousFunction(function(){
-            var element = JS.DOM.getElement(this);
-            var selectedValue = JS.DOM.FORM.getValue(element);
-            if(selectedValue =="+")return;
-            var optionalContainer = JS.DOM.getElement(optionalUUID);
-            var d = _.find(data.data.optional,{id:selectedValue});
-            var html = tlf.getTemplate(d.elementType)(d);
-            var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
-            element.selectedIndex = 0;
-            element.blur();
+        var element = JS.DOM.getElement(this);
+        var selectedValue = JS.DOM.FORM.getValue(element);
+        if(selectedValue =="+")return;
+        var optionalContainer = JS.DOM.getElement(optionalUUID);
+        var d = _.find(data.data.optional,{id:selectedValue});
+        var html = tlf.getTemplate(d.elementType)(d);
+        var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
+        element.selectedIndex = 0;
+        element.blur();
         });
         %>
         <div class="" style="display: inline-block;border:1px solid yellow;">
@@ -310,7 +345,7 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
                 <option>+</option>
                 <optgroup label="Optional Fields">
                     <% _.forEach(data.data.optional,function(val,key,collection){%>
-                      <option value="<%=val.id%>"><%=val.label%></option>
+                    <option value="<%=val.id%>"><%=val.label%></option>
                     <%});%>
                 </optgroup>
             </select>
@@ -328,6 +363,61 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
 <script type="text/html" id="template.empty">
     <div>empty</div>
 </script>
+
+
+<script>
+    var things = [
+        {
+            id:"DataSrcs",
+            elementType:"ddl",
+            label:"Where - Data Source",
+            options:[
+                {
+                    id:"ZNC",
+                    label:"ZNC",
+                    link:"ZNC_OBJECTS"
+                },{
+                    id:"ZOLE",
+                    label:"ZOLE"
+                }
+            ]
+        },
+        {
+            id:"ZNC_OBJECTS",
+            elementType:"ddl",
+            label:"What - Object Type",
+            options:[
+                {
+                    id:"Nominal",
+                    label:"Nominal",
+                    link:"ZNC_NOMINAL_QUERIES"
+                }
+            ]
+        },
+        {
+            id:"ZNC_NOMINAL_QUERIES",
+            elementType:"ddl",
+            label:"How - Query Type",
+            options:[
+                {
+                    id:"BYNAME",
+                    label:"By Name",
+                    link:"ZNC_NOMINAL_BYNAME_FORM"
+                }
+            ]
+        }
+
+    ];
+</script>
+
+XML would allow an XSD??
+<OMNIBOX>
+    <DDL id="dataSources" label="Where - Data Sources">
+        <OPTION id="" label=""></OPTION>
+        <OPTION></OPTION>
+        <OPTION></OPTION>
+    </DDL>
+</OMNIBOX>
 
 </body>
 </html>
