@@ -32,10 +32,10 @@
 
 // TreeRoot -> Node []
 
+// TODO: effectively a linked list
 // TODO: this allows easy reuse and possible override
-var levels = [
-    {
-        id:"DataSrcs",
+var levels = {
+    dataSources:{
         elementType:"ddl",
         label:"Where - Data Source",
         options:[
@@ -49,8 +49,7 @@ var levels = [
             }
         ]
     },
-    {
-        id:"ZNC_OBJECTS",
+    ZNC_OBJECTS:{
         elementType:"ddl",
         label:"What - Object Type",
         options:[
@@ -61,7 +60,7 @@ var levels = [
             }
         ]
     },
-    {
+    ZNC_NOMINAL_QUERIES:{
         id:"ZNC_NOMINAL_QUERIES",
         elementType:"ddl",
         label:"How - Query Type",
@@ -73,7 +72,17 @@ var levels = [
             }
         ]
     }
-];
+};
+
+var levels = {
+    top:{},
+    ZNC:{
+        label:"",
+        levels:{
+
+        }
+    }
+}
 
 var OmniBoxRoot ={
     elementType:"ddl",
@@ -410,10 +419,24 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
     ];
 </script>
 
-XML would allow an XSD??
+// XML would allow: XSD, xPath, xQuery
+// ??? xForms
+// ??? XML would easily allow angular Directives !!!
 <OMNIBOX>
     <DDL id="dataSources" label="Where - Data Sources">
-        <OPTION id="" label=""></OPTION>
+        <OPTION id="" label="">
+            <DDL id="objects" label="What - Objects">
+                <OPTION>
+                    <DDL id="Queries" label="How - Queries">
+                        <OPTION id="BYNAME" label="by Name">
+                            <FORM>
+                                <FIELD id="" label="" required="" validation=""/>
+                            </FORM>
+                        </OPTION>
+                    </DDL>
+                </OPTION>
+            </DDL>
+        </OPTION>
         <OPTION></OPTION>
         <OPTION></OPTION>
     </DDL>
