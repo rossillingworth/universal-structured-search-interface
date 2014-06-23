@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Universal Structured search interface</title>
+    <style>
+
+        select{
+            font-size: large;
+        }
+
+    </style>
+    <script src="js/lodash.compat.js"></script>
+    <script src="js/JS.js"></script>
+</head>
+<body onload="TLF_Factory('tlf-out','box1',null).start()">
+
+<OMNIBOX id="box1">
+    <DDL id="dataSources" label="Where - Data Sources">
+        <OPTION id="ZNC" label="ZNC">
+            <DDL id="objects" label="What - Objects">
+                <OPTION id="Nominal" label="Nominal">
+                    <DDL id="Queries" label="How - Queries">
+                        <OPTION id="BYNAME" label="by Name">
+                            <FORM>
+                                <FIELD type="text" id="firstName" label="First Name"    manditory="true"    validation="required,"  dataLocation="PNC.firstName"/>
+                                <FIELD type="text" id="lastName"  label="Last Name"     manditory="true"    validation="required,"  dataLocation="PNC.LastName"/>
+                                <FIELD type="ddl"  id="sex"       label="Sex"           list="male,female"  validation="sex"        dataLocation="PNC.sex"/>
+                                <FIELD type="text" id="height"    label="Height"                            validation="sex"        dataLocation="PNC.sex"/>
+                            </FORM>
+                        </OPTION>
+                        <OPTION id="byID" label="by Id">
+                            <FORM>
+                                <FIELD id="ZNC-ID" label="ZNC ID" manditory="true" validation="required,isZncId"/>
+                            </FORM>
+                        </OPTION>
+                    </DDL>
+                </OPTION>
+                <OPTION id="Vehicle">
+                    <DDL></DDL>
+                </OPTION>
+            </DDL>
+        </OPTION>
+        <OPTION id="ZOLE" label="Zole"></OPTION>
+        <OPTION id="zvla" label="ZVLA"></OPTION>
+    </DDL>
+</OMNIBOX>
+
+<div id="tlf-out"></div>
+
+
+<script>
+
+    // TODO: convert this to a private/public constructor ?
+
+    var TemplateFactory = {
+        cache:{},
+        prefix:"template.",
+        /**
+         * Convert Template text into Javascript function,
+         * also caches compiled function for faster access
+         */
+        compile:function(name){
+            if(this.cache[name] == undefined){
+                var templateText = JS.DOM.getElement(this.prefix + name,true).innerHTML;
+                this.cache[name] = _.template(templateText);
+            }
+            return this.cache[name];
+        },
+        /**
+         *
+         */
+        render:function(templateName,json){
+            return this.compile(templateName)(json);
+        }
+    };
+
+    //TODO: text & fix factory, convert to new TemplateFactory?
+    function getTemplateFactory(prefix){
+        prefix = prefix || "";
+
+//        var TemplateFactory = TemplateFactory;
+
+        return _.extend({},TemplateFactory,{prefix:prefix});
+    }
+
+
+    function TLF_Factory(container,configContainerId,submitCallback){
+
+        var choices = [];
+        var TlfTemplateFactory = getTemplateFactory("template.");
+
+        var tlf = {
+            identifier:"TLF",
+
+            start:function(){
+                var configContainer = JS.DOM.getElement(configContainerId,true);
+                var dataTag = configContainer.children[0];
+                tlf.populate(0,container,dataTag);
+            },
+            // returns a function
+
+            populate:function(level,element,dataTag){
+                var templateTypeName = dataTag.tagName;
+                var html = TlfTemplateFactory.render(templateTypeName,{
+                    tlf:tlf,
+                    level:level,
+                    dataTag:dataTag
+                });
+                JS.DOM.createElement("span",{class:tlf.identifier,innerHTML:html,style:{display:"inlineBlock"}},element);
+            },
+            prefilterChanged:function(level,dataTag,value){
+                choices = choices.slice(0,level);
+                choices[level]=value;
+                tlf.clean(level);
+//                var d = tlf.getData();
+                var selectedOption = dataTag.children.namedItem(value);
+                var d = selectedOption.children[0];
+                tlf.populate(level+1,container,d);
+            },
+            clean:function clean(level){
+                var children = JS.DOM.getElement(container,true).childNodes;
+                var l = children.length -1;
+                while(l > level){
+                    children[l].parentNode.removeChild(children[l]);
+                    l--;
+                }
+            },
+            getData:function(){
+                var d = config;
+                _.forEach(choices,function(val,key,col){
+                    JS.ASSERT.isTrue(_.isObject(d.data[val].data),"missing expected data");
+                    d = d.data[val].data;
+                })
+                return d;
+            }
+        };
+
+        return tlf;
+    };
+
+
+
+    /**
+     *
+     * @param func
+     * @param storageObject
+     * @param deleteAfterUse
+     * @returns {*}
+     */
+    function namedAnonymousFunction(func,storageObject,deleteAfterUse){
+        var f = func;
+        var name = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+            return v.toString(16);
+        });
+        storageObject = storageObject || window;
+        if(deleteAfterUse){
+            f = function(){
+                var args = Array.prototype.slice.apply(arguments);
+                setTimeout(function(){storageObject[name];},1)
+                return func.apply(this,args);
+            }
+        }
+        storageObject[name]=f;
+        return name;
+    }
+
+    (function(){
+        var n = namedAnonymousFunction(function(){
+            console.log("f has been run");
+        });
+//    setInterval(window[n],1000);
+    })();
+
+
+</script>
+
+<script src="js/lodash.compat.js"></script>
+<script src="js/JS.js"></script>
+
+
+<!-- TEMPLATE for DROP DOWN LIST-->
+<script type="text/html" id="template.DDL">
+    <div class="" style="display: inline-block;border:1px solid red;">
+        <input type="hidden" id="level<%=level%>" name="level<%=level%>" value="">
+        <%
+        var funcName = namedAnonymousFunction(function(){
+        var selectedValue = JS.DOM.FORM.getValue(this);
+        JS.DOM.getElement("level"+level).value = selectedValue;
+        tlf.prefilterChanged(level,dataTag,selectedValue);
+        });
+        console.log("created: "+funcName);
+        %>
+        <label><%=dataTag.getAttribute("label")%></label><br/>
+        <select onchange="window['<%=funcName%>'].apply(this);">
+            <option value="<%=dataTag.getAttribute('label')%>"><%=dataTag.getAttribute("label")%></option>
+            <% _.forEach(dataTag.children,function(val,key,collection){%>
+            <option value="<%=val.getAttribute('id')%>"><%=val.getAttribute("label")%></option>
+            <%});%>
+        </select>
+    </div>
+</script>
+
+<!-- TEMPLATE for FORM & FIELDS -->
+<script type="text/html" id="template.fields">
+    <%
+    var uuid = JS.uuid();
+    var optionalUUID = "optional_"+uuid;
+    %>
+    <div class="" style="display: inline-block;border:1px solid red;">
+        <div class="" style="display: inline-block;border:1px solid blue;">
+            <% _.forEach(data.data.manditory,function(val,key,collection){
+            var html = tlf.getTemplate(val.elementType)(val);
+            %>
+            <%=html%>
+            <%});%>
+        </div>
+        <div id="<%= optionalUUID %>" class="" style="display: inline-block;border:1px solid yellow;">
+        </div>
+        <%
+        var optionalFieldFuncName = namedAnonymousFunction(function(){
+        var element = JS.DOM.getElement(this);
+        var selectedValue = JS.DOM.FORM.getValue(element);
+        if(selectedValue =="+")return;
+        var optionalContainer = JS.DOM.getElement(optionalUUID);
+        var d = _.find(data.data.optional,{id:selectedValue});
+        var html = tlf.getTemplate(d.elementType)(d);
+        var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
+        element.selectedIndex = 0;
+        element.blur();
+        });
+        %>
+        <div class="" style="display: inline-block;border:1px solid yellow;">
+            <select style="width:50px;font-size: xx-large;" onfocus="this.style.width='200px';" onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
+                <option>+</option>
+                <optgroup label="Optional Fields">
+                    <% _.forEach(data.data.optional,function(val,key,collection){%>
+                    <option value="<%=val.id%>"><%=val.label%></option>
+                    <%});%>
+                </optgroup>
+            </select>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="template.textBox">
+    <div class="" style="display: inline-block;border:1px solid red;">
+        <label><%=label%></label><br/>
+        <input type="text" id="<%=dataLocation%>" value="">
+    </div>
+</script>
+
+<script type="text/html" id="template.empty">
+    <div>empty</div>
+</script>
+
+
+<script type="text/html">
+
+    // todo: allow field to specify base field to extend?
+    // or always specify all fields, so single point of responsibility
+
+    // where -> what -> how
+    // Data-src -> ObjectType -> QueryType
+    // who where when what why how
+
+    // config for prefilters - typeName -> typeName -> typeName
+
+    // if type is DDL, display content as DDL: value:text -> id:displayName -> select chooses id
+    // process collection fields in order to get data coordinates
+
+
+    // XML would allow: XSD, xPath, xQuery
+    // ??? xForms
+    // ??? XML would easily allow angular Directives !!!
+
+    questions:
+    in page dynamic generation VS server side XSLt
+    XSL for complete build OR dynamic build JIT components
+
+    options for creating
+    client side - JS dynamic JIT with John Resig Templates
+    client side - JS dynamic JIT XSLt, so XML data island
+    client side - angularJS directives, so inline in HTML
+    server side - XSLt + client side JS to show/hide
+
+</script>
+
+
+
+</body>
+</html>
