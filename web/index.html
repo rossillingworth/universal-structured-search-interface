@@ -3,16 +3,100 @@
 <head>
     <title>Universal Structured search interface</title>
     <style>
+        @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,300);
 
-        select{
-            font-size: large;
+        body {
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 300;
+        }
+
+        .search-bar {
+            border: 1px solid #888;
+            padding: 8px;
+        }
+
+        .tag {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: #3887be;
+            padding: 5px 10px;
+            display: inline-block;
+            border-radius: 3px;
+        }
+
+        .tag label {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tag select, .tag input, .tag option {
+            -webkit-appearance: none;
+            font-size: 0.8em;
+            text-indent: 0px;
+            margin: 0;
+            background-color: rgba(0, 0, 0, 0);
+            border: 1px solid rgba(0, 0, 0, 0);
+            border-radius: 0px;
+            color: #FFF;
+            font-weight: 400;
+            padding: 4px 0;
+            display: block;
+            outline: 0;
+        }
+
+        .tag select:focus, .tag input:focus, .tag input:active, .tag select:active {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .tag input:focus, .tag input:active {
+            border-bottom: 1px solid #FFF;
+        }
+
+        .tag select {
+            background: url(img/select-arrow.png) no-repeat 90% center;
+            padding-right: 25px;
+        }
+
+        .tag input {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            width: 100%;
+        }
+
+        .tag.error {
+            background-color: #be4753;
+        }
+
+        .tag.success {
+            background-color: #4b984c;
+        }
+
+        .tag.add {
+
+        }
+
+        *::-webkit-input-placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        *:-moz-placeholder {
+            /* FF 4-18 */
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        *::-moz-placeholder {
+            /* FF 19+ */
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        *:-ms-input-placeholder {
+            /* IE 10+ */
+            color: rgba(255, 255, 255, 0.6);
         }
 
     </style>
 </head>
 <body onload="TLF_Factory('tlf',OmniBoxRoot,null).start()">
 
-<div id="tlf"></div>
+<div id="tlf" class="search-bar"></div>
 
 <script>
 
@@ -35,58 +119,59 @@
 // TODO: effectively a linked list
 // TODO: this allows easy reuse and possible override
 var levels = {
-    dataSources:{
-        elementType:"ddl",
-        label:"Where - Data Source",
-        options:[
+    dataSources: {
+        elementType: "ddl",
+        label: "Where - Data Source",
+        options: [
             {
-                id:"ZNC",
-                label:"ZNC",
-                link:"ZNC_OBJECTS"
-            },{
-                id:"ZOLE",
-                label:"ZOLE"
+                id: "ZNC",
+                label: "ZNC",
+                link: "ZNC_OBJECTS"
+            },
+            {
+                id: "ZOLE",
+                label: "ZOLE"
             }
         ]
     },
-    ZNC_OBJECTS:{
-        elementType:"ddl",
-        label:"What - Object Type",
-        options:[
+    ZNC_OBJECTS: {
+        elementType: "ddl",
+        label: "What - Object Type",
+        options: [
             {
-                id:"Nominal",
-                label:"Nominal",
-                link:"ZNC_NOMINAL_QUERIES"
+                id: "Nominal",
+                label: "Nominal",
+                link: "ZNC_NOMINAL_QUERIES"
             }
         ]
     },
-    ZNC_NOMINAL_QUERIES:{
-        id:"ZNC_NOMINAL_QUERIES",
-        elementType:"ddl",
-        label:"How - Query Type",
-        options:[
+    ZNC_NOMINAL_QUERIES: {
+        id: "ZNC_NOMINAL_QUERIES",
+        elementType: "ddl",
+        label: "How - Query Type",
+        options: [
             {
-                id:"BYNAME",
-                label:"By Name",
-                link:"ZNC_NOMINAL_BYNAME_FORM"
+                id: "BYNAME",
+                label: "By Name",
+                link: "ZNC_NOMINAL_BYNAME_FORM"
             }
         ]
     }
 };
 
 var levels = {
-    top:{},
-    ZNC:{
-        label:"",
-        levels:{
+    top: {},
+    ZNC: {
+        label: "",
+        levels: {
 
         }
     }
 }
 
-var OmniBoxRoot ={
-    elementType:"ddl",
-    label:"Data-source",
+var OmniBoxRoot = {
+    elementType: "ddl",
+    label: "Select Source",
 //        data:[
 //            {
 //                id:"PNC",
@@ -98,67 +183,72 @@ var OmniBoxRoot ={
 //                }
 //            }
 //        ],
-    data:{
-        ZNC:{
-            label:"ZNC",
-            data:{
-                elementType:"ddl",
-                label:"What -> Object",
-                data:{
-                    Nominal:{
-                        label:"Nominal",
-                        data:{
-                            elementType:"ddl",
-                            label:"How -> Query",
-                            data:{
-                                firstNameLastName:{
-                                    label:"by Name",
-                                    data:{
-                                        elementType:"fields",
-                                        data:{
-                                            manditory:[
+    data: {
+        ZNC: {
+            id: "ZNC",
+            label: "ZNC",
+            data: {
+                elementType: "ddl",
+                label: "What -> Object",
+                data: {
+                    Nominal: {
+                        label: "Nominal",
+                        data: {
+                            elementType: "ddl",
+                            label: "How -> Query",
+                            data: {
+                                firstNameLastName: {
+                                    label: "by Name",
+                                    data: {
+                                        elementType: "fields",
+                                        data: {
+                                            manditory: [
                                                 {
-                                                    elementType:"textBox",
-                                                    label:"First Name",             // label for field
-                                                    validation:"",                  // validation function / funcName, can be an object / array for multiples
-                                                    dataLocation:"query.firstName"  // where to put data in query
+                                                    elementType: "textBox",
+                                                    label: "First Name",             // label for field
+                                                    validation: "",                  // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation: "query.firstName",  // where to put data in query
+                                                    placeholder: "e.g Joe"
                                                 },
                                                 {
-                                                    elementType:"textBox",
-                                                    label:"Last Name",              // label for field
-                                                    validation:"",                  // validation function / funcName, can be an object / array for multiples
-                                                    dataLocation:"query.lastName"   // where to put data in query
+                                                    elementType: "textBox",
+                                                    label: "Last Name",              // label for field
+                                                    validation: "",                  // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation: "query.lastName",   // where to put data in query
+                                                    placeholder: "e.g Bloggs"
                                                 }
                                             ],
-                                            optional:[
+                                            optional: [
                                                 {
-                                                    id:"SEX",
-                                                    elementType:"textBox",
-                                                    label:"SEX",                // label for field
-                                                    validation:"",              // validation function / funcName, can be an object / array for multiples
-                                                    dataLocation:"query.sex"    // where to put data in query
+                                                    id: "SEX",
+                                                    elementType: "textBox",
+                                                    label: "SEX",                // label for field
+                                                    validation: "",              // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation: "query.sex",    // where to put data in query
+                                                    placeholder: "e.g Female"
                                                 }
                                             ],
-                                            validation:null,
-                                            postProcess:null
+                                            validation: null,
+                                            postProcess: null
                                         }
                                     }
                                 },
-                                ZNCid:{
-                                    label:"by ZNC ID",
-                                    data:{
-                                        elementType:"fields",
-                                        data:{
-                                            manditory:[
+                                ZNCid: {
+                                    label: "by ZNC ID",
+                                    data: {
+                                        elementType: "fields",
+                                        data: {
+                                            manditory: [
                                                 {
-                                                    elementType:"textBox",
-                                                    label:"ZNC-Id",     // label for field
-                                                    validation:"",          // validation function / funcName, can be an object / array for multiples
-                                                    dataLocation:"query.zncid"  // where to put data in query
+                                                    elementType: "textBox",
+                                                    label: "ZNC-Id",     // label for field
+                                                    validation: "",          // validation function / funcName, can be an object / array for multiples
+                                                    dataLocation: "query.zncid",  // where to put data in query
+                                                    placeholder: "e.g Female"
                                                 }
                                             ],
-                                            optional:[],
-                                            postProcess:null
+                                            optional: [],
+                                            postProcess: null
                                         }
                                     }
                                 }
@@ -168,30 +258,32 @@ var OmniBoxRoot ={
                 }
             }
         },
-        ZOLE:{
-            label:"ZOLE",
-            data:{
-                elementType:"fields",
-                data:{
-                    manditory:[
+        ZOLE: {
+            label: "ZOLE",
+            data: {
+                elementType: "fields",
+                data: {
+                    manditory: [
                         {
-                            id:"SEX",
-                            elementType:"textBox",
-                            label:"Zoomba",             // label for field
-                            validation:"",                  // validation function / funcName, can be an object / array for multiples
-                            dataLocation:"query.zoomba"  // where to put data in query
+                            id: "SEX",
+                            elementType: "textBox",
+                            label: "Zoomba",             // label for field
+                            validation: "",                  // validation function / funcName, can be an object / array for multiples
+                            dataLocation: "query.zoomba",  // where to put data in query
+                            placeholder: "e.g Female"
                         }
                     ],
-                    optional:[
+                    optional: [
                         {
-                            id:"SEX",
-                            elementType:"textBox",
-                            label:"SEX",                // label for field
-                            validation:"",              // validation function / funcName, can be an object / array for multiples
-                            dataLocation:"query.sex"    // where to put data in query
+                            id: "SEX",
+                            elementType: "textBox",
+                            label: "SEX",                // label for field
+                            validation: "",              // validation function / funcName, can be an object / array for multiples
+                            dataLocation: "query.sex",    // where to put data in query
+                            placeholder: "e.g Female"
                         }
                     ],
-                    postProcess:null
+                    postProcess: null
                 }
             }
         }
@@ -199,64 +291,63 @@ var OmniBoxRoot ={
 };
 
 
-
-function TLF_Factory(container,config,submitCallback){
+function TLF_Factory(container, config, submitCallback) {
 
     var choices = [];
 
     var tlf = {
-        templatePrefix:"template.",
-        templates:{},
-        identifier:"TLF",
-        start:function(){
-            tlf.populate(0,container,config);
+        templatePrefix: "template.",
+        templates: {},
+        identifier: "TLF",
+        start: function () {
+            tlf.populate(0, container, config);
         },
         // returns a function
-        getTemplate:function(templateName,json){
-            if(tlf.templates[templateName] == undefined){
-                var templateText = JS.DOM.getElement(tlf.templatePrefix + templateName,true).innerHTML;
+        getTemplate: function (templateName, json) {
+            if (tlf.templates[templateName] == undefined) {
+                var templateText = JS.DOM.getElement(tlf.templatePrefix + templateName, true).innerHTML;
                 tlf.templates[templateName] = _.template(templateText);
             }
             return tlf.templates[templateName];
         },
-        populate:function(level,element,data){
+        populate: function (level, element, data) {
             var templateTypeName = data.elementType;
             var templateFunc = tlf.getTemplate(templateTypeName);
             var html = templateFunc({
-                tlf:tlf,
-                level:level,
-                data:data
+                tlf: tlf,
+                level: level,
+                data: data
             });
             // todo: extend element config with data.config
-            JS.DOM.createElement("span",{class:tlf.identifier,innerHTML:html,style:{display:"inlineBlock"}},element);
+            JS.DOM.createElement("span", {class: tlf.identifier, innerHTML: html, style: {display: "inlineBlock"}}, element);
         },
-        prefilterChanged:function(level,value){
-            choices = choices.slice(0,level);
-            choices[level]=value;
+        prefilterChanged: function (level, value) {
+            choices = choices.slice(0, level);
+            choices[level] = value;
             tlf.clean(level);
             var d = tlf.getData();
-            tlf.populate(level+1,container,d);
+            tlf.populate(level + 1, container, d);
         },
-        clean:function clean(level){
-            var children = JS.DOM.getElement(container,true).childNodes;
-            var l = children.length -1;
-            while(l > level){
+        clean: function clean(level) {
+            var children = JS.DOM.getElement(container, true).childNodes;
+            var l = children.length - 1;
+            while (l > level) {
                 children[l].parentNode.removeChild(children[l]);
                 l--;
             }
         },
-        getData:function(){
+        getData: function () {
             var d = config;
-            _.forEach(choices,function(val,key,col){
-                JS.ASSERT.isTrue(_.isObject(d.data[val].data),"missing expected data");
+            _.forEach(choices, function (val, key, col) {
+                JS.ASSERT.isTrue(_.isObject(d.data[val].data), "missing expected data");
                 d = d.data[val].data;
-            })
+            });
             return d;
         }
     };
     return tlf;
-};
-
+}
+;
 
 
 /**
@@ -266,26 +357,28 @@ function TLF_Factory(container,config,submitCallback){
  * @param deleteAfterUse
  * @returns {*}
  */
-function namedAnonymousFunction(func,storageObject,deleteAfterUse){
+function namedAnonymousFunction(func, storageObject, deleteAfterUse) {
     var f = func;
-    var name = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    var name = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
     storageObject = storageObject || window;
-    if(deleteAfterUse){
-        f = function(){
+    if (deleteAfterUse) {
+        f = function () {
             var args = Array.prototype.slice.apply(arguments);
-            setTimeout(function(){storageObject[name];},1)
-            return func.apply(this,args);
+            setTimeout(function () {
+                storageObject[name];
+            }, 1)
+            return func.apply(this, args);
         }
     }
-    storageObject[name]=f;
+    storageObject[name] = f;
     return name;
 }
 
-(function(){
-    var n = namedAnonymousFunction(function(){
+(function () {
+    var n = namedAnonymousFunction(function () {
         console.log("f has been run");
     });
 //    setInterval(window[n],1000);
@@ -300,7 +393,11 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
 
 <!-- TEMPLATE for DROP DOWN LIST-->
 <script type="text/html" id="template.ddl">
-    <div class="" style="display: inline-block;border:1px solid red;">
+    <%
+    var labelId = _.uniqueId("label");
+    %>
+
+    <div class="tag">
         <input type="hidden" id="level<%=level%>" name="level<%=level%>" value="">
         <%
         var funcName = namedAnonymousFunction(function(){
@@ -310,13 +407,13 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
         });
         console.log("created: "+funcName);
         %>
-        <label><%=data.label%></label><br/>
-        <select onchange="window['<%=funcName%>'].apply(this);">
-            <option value="<%=data.label%>"><%=data.label%></option>
-            <% _.forEach(data.data,function(val,key,collection){%>
-            <option value="<%=key%>"><%=val.label%></option>
-            <%});%>
-        </select>
+        <label for="<%=labelId%>"><%=data.label%></label><br/><select id="<%=labelId%>"
+                                                                      onchange="window['<%=funcName%>'].apply(this);">
+        <option value="<%=data.label%>"><%=data.label%></option>
+        <% _.forEach(data.data,function(val,key,collection){%>
+        <option value="<%=key%>"><%=val.label%></option>
+        <%});%>
+    </select>
     </div>
 </script>
 
@@ -326,46 +423,45 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
     var uuid = JS.uuid();
     var optionalUUID = "optional_"+uuid;
     %>
-    <div class="" style="display: inline-block;border:1px solid red;">
-        <div class="" style="display: inline-block;border:1px solid blue;">
+    <div class="" style="display:inline-block">
+        <div style="display:inline-block">
             <% _.forEach(data.data.manditory,function(val,key,collection){
             var html = tlf.getTemplate(val.elementType)(val);
             %>
             <%=html%>
             <%});%>
         </div>
-        <div id="<%= optionalUUID %>" class="" style="display: inline-block;border:1px solid yellow;">
+        <div id="<%= optionalUUID %>" class="" style="display:inline-block">
         </div>
         <%
         var optionalFieldFuncName = namedAnonymousFunction(function(){
-        var element = JS.DOM.getElement(this);
-        var selectedValue = JS.DOM.FORM.getValue(element);
-        if(selectedValue =="+")return;
-        var optionalContainer = JS.DOM.getElement(optionalUUID);
-        var d = _.find(data.data.optional,{id:selectedValue});
-        var html = tlf.getTemplate(d.elementType)(d);
-        var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
-        element.selectedIndex = 0;
-        element.blur();
+            var element = JS.DOM.getElement(this);
+            var selectedValue = JS.DOM.FORM.getValue(element);
+            if(selectedValue =="+")return;
+            var optionalContainer = JS.DOM.getElement(optionalUUID);
+            var d = _.find(data.data.optional,{id:selectedValue});
+            var html = tlf.getTemplate(d.elementType)(d);
+            var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
+            element.selectedIndex = 0;
+            element.blur();
         });
         %>
         <div class="" style="display: inline-block;border:1px solid yellow;">
-            <select style="width:50px;font-size: xx-large;" onfocus="this.style.width='200px';" onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
+            <select style="width:50px;font-size: xx-large;" onfocus="this.style.width='200px';"
+                    onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
                 <option>+</option>
-                <optgroup label="Optional Fields">
-                    <% _.forEach(data.data.optional,function(val,key,collection){%>
-                    <option value="<%=val.id%>"><%=val.label%></option>
-                    <%});%>
-                </optgroup>
+                <% _.forEach(data.data.optional,function(val,key,collection){%>
+                <option value="<%=val.id%>"><%=val.label%></option>
+                <%});%>
             </select>
         </div>
     </div>
 </script>
 
 <script type="text/html" id="template.textBox">
-    <div class="" style="display: inline-block;border:1px solid red;">
+    <div class="tag">
         <label><%=label%></label><br/>
-        <input type="text" id="<%=dataLocation%>" value="">
+        <input type="text" id="<%=dataLocation%>" placeholder="<%=placeholder%>" value="">
     </div>
 </script>
 
@@ -377,41 +473,42 @@ function namedAnonymousFunction(func,storageObject,deleteAfterUse){
 <script>
     var things = [
         {
-            id:"DataSrcs",
-            elementType:"ddl",
-            label:"Where - Data Source",
-            options:[
+            id: "DataSrcs",
+            elementType: "ddl",
+            label: "Where - Data Source",
+            options: [
                 {
-                    id:"ZNC",
-                    label:"ZNC",
-                    link:"ZNC_OBJECTS"
-                },{
-                    id:"ZOLE",
-                    label:"ZOLE"
+                    id: "ZNC",
+                    label: "ZNC",
+                    link: "ZNC_OBJECTS"
+                },
+                {
+                    id: "ZOLE",
+                    label: "ZOLE"
                 }
             ]
         },
         {
-            id:"ZNC_OBJECTS",
-            elementType:"ddl",
-            label:"What - Object Type",
-            options:[
+            id: "ZNC_OBJECTS",
+            elementType: "ddl",
+            label: "What - Object Type",
+            options: [
                 {
-                    id:"Nominal",
-                    label:"Nominal",
-                    link:"ZNC_NOMINAL_QUERIES"
+                    id: "Nominal",
+                    label: "Nominal",
+                    link: "ZNC_NOMINAL_QUERIES"
                 }
             ]
         },
         {
-            id:"ZNC_NOMINAL_QUERIES",
-            elementType:"ddl",
-            label:"How - Query Type",
-            options:[
+            id: "ZNC_NOMINAL_QUERIES",
+            elementType: "ddl",
+            label: "How - Query Type",
+            options: [
                 {
-                    id:"BYNAME",
-                    label:"By Name",
-                    link:"ZNC_NOMINAL_BYNAME_FORM"
+                    id: "BYNAME",
+                    label: "By Name",
+                    link: "ZNC_NOMINAL_BYNAME_FORM"
                 }
             ]
         }
