@@ -54,6 +54,7 @@ var JS = {
                 if(JS.debug){
                     // if you have got here, you have a serious error
                     // use your debugger stack trace to identify the cause
+                    JS.log(message);
                     debugger;
                 }
                 throw new Error(message);
@@ -79,9 +80,10 @@ var JS = {
             // assert
             assert && JS.ASSERT.is((_.isString(element) || element.nodeType == 1),true,"getElement: bad element");
             // assign
+            var elementName = element;
             var element = (typeof element === "string")?document.getElementById(element):element;
             // assert result
-            assert && JS.ASSERT.is(element && element.nodeType == 1,true,"getElement: unable to find element");
+            !!assert && JS.ASSERT.is(!!element && element.nodeType == 1,true,"getElement: unable to find element: " + elementName);
             // return element
             return element;
         }
