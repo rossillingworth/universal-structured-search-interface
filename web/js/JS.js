@@ -17,7 +17,7 @@
  * NB: my version of partial binding allows merging arguments
  */
 if(!window["_"]){
-    throw new Error("JS.js requires the underscore library")
+    throw new Error("JS.js requires the lodash library");
 }
 
 // just for fun
@@ -466,8 +466,23 @@ var JS = {
 //                console.log(values);
                 return function(el,ind,arr){
                     return el[name] && _.reduce(values, function(start,val){
-//                        console.log(el[name] + " ?==? " + val);
+                        console.log(el[name] + " ?==? " + val);
                         return start || el[name]==val;
+                    },false);
+                };
+            }
+            /**
+             * generate filter function
+             * verifies iterated element attribute isEqual to value
+             * NB: is case sensitive
+             */
+            ,isElementAttribute:function (name,value /** [,value...] **/){
+                var values = JS.ARRAY.fromCollection(arguments).slice(1);
+//                console.log(values);
+                return function(el,ind,arr){
+                    return el.hasAttribute(name) && _.reduce(values, function(start,val){
+                        console.log(el.getAttribute(name) + " ?==? " + val);
+                        return start || el.getAttribute(name)==val;
                     },false);
                 };
             }
@@ -763,5 +778,19 @@ var JS = {
 // ie: trim -> split.partial(",") -> join("|")
 // also allows verify functions to be added at start / end
 // NB: throw exceptions when bad errors...!
+
+/**
+ * findByAttributes - used to find any element in a collection/array,
+ * where the attribute value is in a list of values.
+ *
+ * property - name of attribute to check
+ * values   - single value, or array of values to check against
+ */
+_.mixin({
+    'findByAttributes': function(collection, property, values) {
+        var args = [property].concat(_.isArray(values)?values:[values]);
+        return _.filter(collection, JS.ARRAY.FILTERS.isElementAttribute.apply(null,args));
+    }
+});
 
 

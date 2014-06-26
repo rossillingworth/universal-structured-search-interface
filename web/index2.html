@@ -15,17 +15,17 @@
 <body onload="TLF_Factory('tlf-out','box1',null).start()">
 
 <OMNIBOX id="box1">
-    <DDL id="dataSources" label="Where - Data Sources">
+    <DDL id="dataSources" label="Data Sources">
         <OPTION id="ZNC" label="ZNC">
-            <DDL id="objects" label="What - Objects">
+            <DDL id="objects" label="Object">
                 <OPTION id="Nominal" label="Nominal">
-                    <DDL id="Queries" label="How - Queries">
+                    <DDL id="Queries" label="How">
                         <OPTION id="BYNAME" label="by Name">
                             <FORM>
-                                <FIELD type="text" id="firstName" label="First Name"    manditory="true"    validation="required,"  dataLocation="PNC.firstName"/>
-                                <FIELD type="text" id="lastName"  label="Last Name"     manditory="true"    validation="required,"  dataLocation="PNC.LastName"/>
-                                <FIELD type="ddl"  id="sex"       label="Sex"           list="male,female"  validation="sex"        dataLocation="PNC.sex"/>
-                                <FIELD type="text" id="height"    label="Height"                            validation="sex"        dataLocation="PNC.sex"/>
+                                <TEXT type="text" id="firstName" label="First Name"    mandatory="true"    validation="required,"  dataLocation="PNC.firstName"></TEXT>
+                                <TEXT type="text" id="lastName"  label="Last Name"     mandatory="true"    validation="required,"  dataLocation="PNC.LastName"></TEXT>
+                                <LIST type="ddl"  id="sex"       label="Sex"           list="male,female"  validation="sex"        dataLocation="PNC.sex"></LIST>
+                                <TEXT type="text" id="height"    label="Height"                            validation="sex"        dataLocation="PNC.sex"></TEXT>
                             </FORM>
                         </OPTION>
                         <OPTION id="byID" label="by Id">
@@ -35,7 +35,7 @@
                         </OPTION>
                     </DDL>
                 </OPTION>
-                <OPTION id="Vehicle">
+                <OPTION id="Vehicle" label="Vehicle">
                     <DDL></DDL>
                 </OPTION>
             </DDL>
@@ -51,6 +51,11 @@
 <script>
 
     // TODO: convert this to a private/public constructor ?
+
+    // triggerEvent(true) on open
+    // triggerEvent(false) on close
+    // clear items backwards, use treewalk, call event handler if exists
+    // add target tag to CONFIG - ie: field goes here target?
 
     var TemplateFactory = {
         cache:{},
@@ -71,23 +76,18 @@
          */
         render:function(templateName,json){
             return this.compile(templateName)(json);
+        },
+        getTemplateFactory:function(prefix){
+            prefix = prefix || "";
+            return _.extend({},TemplateFactory,{prefix:prefix});
         }
     };
-
-    //TODO: text & fix factory, convert to new TemplateFactory?
-    function getTemplateFactory(prefix){
-        prefix = prefix || "";
-
-//        var TemplateFactory = TemplateFactory;
-
-        return _.extend({},TemplateFactory,{prefix:prefix});
-    }
 
 
     function TLF_Factory(container,configContainerId,submitCallback){
 
         var choices = [];
-        var TlfTemplateFactory = getTemplateFactory("template.");
+        var TlfTemplateFactory = TemplateFactory.getTemplateFactory("template.");
 
         var tlf = {
             identifier:"TLF",
@@ -97,16 +97,26 @@
                 var dataTag = configContainer.children[0];
                 tlf.populate(0,container,dataTag);
             },
-            // returns a function
-
             populate:function(level,element,dataTag){
-                var templateTypeName = dataTag.tagName;
-                var html = TlfTemplateFactory.render(templateTypeName,{
-                    tlf:tlf,
-                    level:level,
-                    dataTag:dataTag
+                if(dataTag.tagName == "FORM"){
+                    this.populateForm(level,element,dataTag);
+                }else{
+                    var templateTypeName = dataTag.tagName;
+                    var html = TlfTemplateFactory.render(templateTypeName,{
+                        tlf:tlf,
+                        level:level,
+                        dataTag:dataTag
+                    });
+                    JS.DOM.createElement("span",{class:tlf.identifier,innerHTML:html,style:{display:"inlineBlock"}},element);
+                }
+            },
+            populateForm:function(level,element,dataTag){
+                debugger;
+                var fields = JS.ARRAY.fromCollection(dataTag.children);
+                var mandatoryFields = _.findByAttributes(fields,"mandatory","true");
+                _.forEach(mandatoryFields,function(childDataTag){
+                    tlf.populate(level,element,childDataTag);
                 });
-                JS.DOM.createElement("span",{class:tlf.identifier,innerHTML:html,style:{display:"inlineBlock"}},element);
             },
             prefilterChanged:function(level,dataTag,value){
                 choices = choices.slice(0,level);
@@ -185,9 +195,9 @@
         <input type="hidden" id="level<%=level%>" name="level<%=level%>" value="">
         <%
         var funcName = namedAnonymousFunction(function(){
-        var selectedValue = JS.DOM.FORM.getValue(this);
-        JS.DOM.getElement("level"+level).value = selectedValue;
-        tlf.prefilterChanged(level,dataTag,selectedValue);
+            var selectedValue = JS.DOM.FORM.getValue(this);
+            JS.DOM.getElement("level"+level).value = selectedValue;
+            tlf.prefilterChanged(level,dataTag,selectedValue);
         });
         console.log("created: "+funcName);
         %>
@@ -202,13 +212,17 @@
 </script>
 
 <!-- TEMPLATE for FORM & FIELDS -->
-<script type="text/html" id="template.fields">
+<script type="text/html" id="template.FORM">
     <%
     var uuid = JS.uuid();
     var optionalUUID = "optional_"+uuid;
     %>
     <div class="" style="display: inline-block;border:1px solid red;">
         <div class="" style="display: inline-block;border:1px solid blue;">
+            <%
+              // get list of mandatory fields -> call template for each
+            %>
+
             <% _.forEach(data.data.manditory,function(val,key,collection){
             var html = tlf.getTemplate(val.elementType)(val);
             %>
@@ -243,10 +257,10 @@
     </div>
 </script>
 
-<script type="text/html" id="template.textBox">
+<script type="text/html" id="template.TEXT">
     <div class="" style="display: inline-block;border:1px solid red;">
-        <label><%=label%></label><br/>
-        <input type="text" id="<%=dataLocation%>" value="">
+        <label><%=dataTag.getAttribute("label")%></label><br/>
+        <input type="text" id="<%=dataTag.getAttribute('dataLocation')%>" value="">
     </div>
 </script>
 
