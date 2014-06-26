@@ -13,6 +13,17 @@ TODO - Language Injection
  - validate JSON data object against expectations??
 
 
+TODO - stop js compiler error by registering func in compiler...!
+--------------------------------------------------------------------
+http://confluence.jetbrains.com/display/CONTEST/IntelliLang
+--------------------------------------------------------------------
+@Language(value = "JavaScript", prefix = "function doSomethingElse(a){ }")
+String code = "function doSomething() {\n" +
+"  var x = 1;\n" +
+"  doSomethingElse(x);\n" +
+"}";
+
+
 Idea
 ------
 

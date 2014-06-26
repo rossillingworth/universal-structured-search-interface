@@ -99,6 +99,7 @@
                 tlf.populate(0,container,dataTag);
             },
             populate:function(level,element,dataTag){
+                element = JS.DOM.getElement(element,true);
                 if(dataTag.tagName == "FORM"){
                     this.populateForm(level,element,dataTag);
                 }else{
@@ -113,7 +114,6 @@
                 }
             },
             populateForm:function(level,element,dataTag){
-                debugger;
                 var fields = JS.ARRAY.fromCollection(dataTag.children);
                 var mandatoryFields = _.findByAttributes(fields,"mandatory","true");
                 _.forEach(mandatoryFields,function(childDataTag){
@@ -194,22 +194,17 @@
 <!-- TEMPLATE for DROP DOWN LIST-->
 <script type="text/html" id="template.DDL" vars="uuid,tfl,level,dataTag">
     <%
-        var childrenContainerName = "ddl_" + uuid;
+        var childrenContainerId = "ddl_" + uuid;
         var funcNameDDLChanged = namedAnonymousFunction(function(){
             // remove all old descendants
-            var container = JS.DOM.getElement(childrenContainerName);
+            var container = JS.DOM.getElement(childrenContainerId);
             container.innerHTML = "";
             // get selected value
             var selectedValue = JS.DOM.FORM.getValue(this);
             // populate new child
             var childDataTag = dataTag.children.namedItem(selectedValue);
             tlf.populate(level+1,container,childDataTag)
-
-
-            //JS.DOM.getElement("level"+level).value = selectedValue;
-            //tlf.prefilterChanged(level,dataTag,selectedValue);
         });
-        console.log("created: "+funcNameDDLChanged);
     %>
     <div class="" style="display: inline-block;border:1px solid red;">
         <input type="hidden" id="level<%=level%>" name="level<%=level%>" value="">
@@ -220,69 +215,65 @@
             <option value="<%=val.getAttribute('id')%>"><%=val.getAttribute("label")%></option>
             <%});%>
         </select>
-        <span id="<%=childrenContainerName%>"></span>
     </div>
+    <span id="<%=childrenContainerId%>"></span>
 </script>
 
 <script type="text/html" id="template.OPTION" vars="uuid,tlf,level,dataTag">
     <%
-        var childrenContainerName = "option_" + uuid;
-        setTimeout(function(){
-            alert("option");
-            debugger;
-            // must get container here, as does not exist in outer func
-            var container = JS.DOM.getElement(childrenContainerName);
-            var childDataTag = dataTag.children[0];
-            tlf.populate(level,container,childDataTag);
-        },100);
+    var childrenContainerId = "option_" + uuid;
+    setTimeout(function(){
+    var childDataTag = dataTag.children[0];
+    tlf.populate(level,childrenContainerId,childDataTag);
+    },1);
     %>
-    <span id="<%=childrenContainerName%>"></span>
+    <span id="<%=childrenContainerId%>"></span>
 </script>
 
 <!-- TEMPLATE for FORM & FIELDS -->
-        <script type="text/html" id="template.FORM">
-        <%
-var uuid = JS.uuid();
-var optionalUUID = "optional_"+uuid;
-%>
-<div class="" style="display: inline-block;border:1px solid red;">
-        <div class="" style="display: inline-block;border:1px solid blue;">
-        <%
-// get list of mandatory fields -> call template for each
-%>
-
-<% _.forEach(data.data.manditory,function(val,key,collection){
-    var html = tlf.getTemplate(val.elementType)(val);
+<script type="text/html" id="template.FORM">
+    <%
+    var uuid = JS.uuid();
+    var optionalUUID = "optional_"+uuid;
     %>
-    <%=html%>
+    <div class="" style="display: inline-block;border:1px solid red;">
+        <div class="" style="display: inline-block;border:1px solid blue;">
+            <%
+            // get list of mandatory fields -> call template for each
+            %>
+
+            <% _.forEach(data.data.manditory,function(val,key,collection){
+            var html = tlf.getTemplate(val.elementType)(val);
+            %>
+            <%=html%>
             <%});%>
-</div>
-<div id="<%= optionalUUID %>" class="" style="display: inline-block;border:1px solid yellow;">
         </div>
-<%
-var optionalFieldFuncName = namedAnonymousFunction(function(){
-    var element = JS.DOM.getElement(this);
-    var selectedValue = JS.DOM.FORM.getValue(element);
-    if(selectedValue =="+")return;
-    var optionalContainer = JS.DOM.getElement(optionalUUID);
-    var d = _.find(data.data.optional,{id:selectedValue});
-    var html = tlf.getTemplate(d.elementType)(d);
-    var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
-    element.selectedIndex = 0;
-    element.blur();
-});
-%>
-<div class="" style="display: inline-block;border:1px solid yellow;">
-        <select style="width:50px;font-size: xx-large;" onfocus="this.style.width='200px';" onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
-        <option>+</option>
-<optgroup label="Optional Fields">
-        <% _.forEach(data.data.optional,function(val,key,collection){%>
-    <option value="<%=val.id%>"><%=val.label%></option>
-    <%});%>
-</optgroup>
-</select>
-</div>
-</div>
+        <div id="<%= optionalUUID %>" class="" style="display: inline-block;border:1px solid yellow;">
+        </div>
+        <%
+        var optionalFieldFuncName = namedAnonymousFunction(function(){
+        var element = JS.DOM.getElement(this);
+        var selectedValue = JS.DOM.FORM.getValue(element);
+        if(selectedValue =="+")return;
+        var optionalContainer = JS.DOM.getElement(optionalUUID);
+        var d = _.find(data.data.optional,{id:selectedValue});
+        var html = tlf.getTemplate(d.elementType)(d);
+        var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
+        element.selectedIndex = 0;
+        element.blur();
+        });
+        %>
+        <div class="" style="display: inline-block;border:1px solid yellow;">
+            <select style="width:50px;font-size: xx-large;" onfocus="this.style.width='200px';" onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
+                <option>+</option>
+                <optgroup label="Optional Fields">
+                    <% _.forEach(data.data.optional,function(val,key,collection){%>
+                    <option value="<%=val.id%>"><%=val.label%></option>
+                    <%});%>
+                </optgroup>
+            </select>
+        </div>
+    </div>
 </script>
 
 <script type="text/html" id="template.TEXT">
@@ -293,7 +284,7 @@ var optionalFieldFuncName = namedAnonymousFunction(function(){
 </script>
 
 <script type="text/html" id="template.CIRCLE">
-    <svg height="100%">
+    <svg height="30">
         <circle cx="10" cy="10" r="10" stroke="green" stroke-width="4" fill="yellow" />
     </svg>
 </script>
