@@ -24,6 +24,7 @@
                             <FORM>
                                 <TEXT type="text" id="firstName" label="First Name"    mandatory="true"    validation="required,"  dataLocation="PNC.firstName"></TEXT>
                                 <TEXT type="text" id="lastName"  label="Last Name"     mandatory="true"    validation="required,"  dataLocation="PNC.LastName"></TEXT>
+                                <CIRCLE type="text" id="circle"  label="Last Name"     mandatory="true"    validation="required,"  dataLocation="PNC.LastName"></CIRCLE>
                                 <LIST type="ddl"  id="sex"       label="Sex"           list="male,female"  validation="sex"        dataLocation="PNC.sex"></LIST>
                                 <TEXT type="text" id="height"    label="Height"                            validation="sex"        dataLocation="PNC.sex"></TEXT>
                             </FORM>
@@ -233,15 +234,15 @@
         </div>
         <%
         var optionalFieldFuncName = namedAnonymousFunction(function(){
-        var element = JS.DOM.getElement(this);
-        var selectedValue = JS.DOM.FORM.getValue(element);
-        if(selectedValue =="+")return;
-        var optionalContainer = JS.DOM.getElement(optionalUUID);
-        var d = _.find(data.data.optional,{id:selectedValue});
-        var html = tlf.getTemplate(d.elementType)(d);
-        var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
-        element.selectedIndex = 0;
-        element.blur();
+            var element = JS.DOM.getElement(this);
+            var selectedValue = JS.DOM.FORM.getValue(element);
+            if(selectedValue =="+")return;
+            var optionalContainer = JS.DOM.getElement(optionalUUID);
+            var d = _.find(data.data.optional,{id:selectedValue});
+            var html = tlf.getTemplate(d.elementType)(d);
+            var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
+            element.selectedIndex = 0;
+            element.blur();
         });
         %>
         <div class="" style="display: inline-block;border:1px solid yellow;">
@@ -263,6 +264,21 @@
         <input type="text" id="<%=dataTag.getAttribute('dataLocation')%>" value="">
     </div>
 </script>
+
+<script type="text/html" id="template.CIRCLE">
+    <svg height="100%">
+        <circle cx="10" cy="10" r="10" stroke="green" stroke-width="4" fill="yellow" />
+    </svg>
+</script>
+
+<script type="text/html" id="template.SVG-HTML">
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+        <foreignObject x="40" y="40" width="100" height="100" requiredExtensions="http://www.w3.org/1999/xhtml">
+            <div xmlns="http://www.w3.org/1999/xhtml">test</div>
+        </foreignObject>
+    </svg>
+</script>
+
 
 <script type="text/html" id="template.empty">
     <div>empty</div>

@@ -1,0 +1,36 @@
+
+? templates for every XML tag -> completely custom HTML
+
+? children tag in each template, used to contain child tags
+ie: when parent is removed, removes all children
+- if container is span, should wrap around well
+
+? + SVG in templates, with HTML inside?
+- allows totally custom components - but configurable
+
+? + CANVAS in templates?
+- same features as SVG?
+- can I embed HTML inside Canvas ?
+
+Canvas
+=========
+Resolution dependent
+No support for event handlers
+Poor text rendering capabilities
+You can save the resulting image as .png or .jpg
+Well suited for graphic-intensive games
+? what browsers support this?
+
+SVG
+====
+Resolution independent
+Support for event handlers
+Best suited for applications with large rendering areas (Google Maps)
+Slow rendering if complex (anything that uses the DOM a lot will be slow)
+Not suited for game applications
+? what browsers support this?
+- allowed - SVG in: img, CSS background,
+
+NB:
+-----
+YOU CAN SAVE CANVAS AS PNG!!!
