@@ -1,4 +1,21 @@
 
+Stuff to do
+-------
+TODO - for PROD: nodeJS compile HTML templates to Javascript Functions in CACHE
+ - put all templates in a folder, cache name is template name minus .js
+
+TODO - Add MPS DSL for templates inside Intellij
+ - allow script editing in templates properly...!
+ - this would be the killer feature!
+
+TODO - Language Injection
+ - add Template expected VARs to template definition attributes
+ - validate JSON data object against expectations??
+
+
+Idea
+------
+
 ? templates for every XML tag -> completely custom HTML
 
 ? children tag in each template, used to contain child tags
