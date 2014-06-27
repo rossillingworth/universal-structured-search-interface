@@ -787,7 +787,7 @@ var JS = {
  * values   - single value, or array of values to check against
  */
 _.mixin({
-    'findByAttributes': function(collection, property, values) {
+    'findByAttribute': function(collection, property, values) {
         var args = [property].concat(_.isArray(values)?values:[values]);
         return _.filter(collection, JS.ARRAY.FILTERS.isElementAttribute.apply(null,args));
     }

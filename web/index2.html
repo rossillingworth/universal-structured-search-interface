@@ -11,6 +11,8 @@
     </style>
     <script src="js/lodash.compat.js"></script>
     <script src="js/JS.js"></script>
+    <script src="js/TemplateFactory.js"></script>
+    <script src="js/namedAnonFunc.js"></script>
 </head>
 <body onload="TLF_Factory('tlf-out','box1',null).start()">
 
@@ -22,11 +24,12 @@
                     <DDL id="Queries" label="How">
                         <OPTION id="BYNAME" label="by Name">
                             <FORM>
-                                <TEXT type="text" id="firstName" label="First Name"    mandatory="true"    validation="required,"  dataLocation="PNC.firstName"></TEXT>
-                                <TEXT type="text" id="lastName"  label="Last Name"     mandatory="true"    validation="required,"  dataLocation="PNC.LastName"></TEXT>
-                                <CIRCLE type="text" id="circle"  label="Last Name"     mandatory="true"    validation="required,"  dataLocation="PNC.LastName"></CIRCLE>
-                                <LIST type="ddl"  id="sex"       label="Sex"           list="male,female"  validation="sex"        dataLocation="PNC.sex"></LIST>
-                                <TEXT type="text" id="height"    label="Height"                            validation="sex"        dataLocation="PNC.sex"></TEXT>
+                                <TEXT type="text" id="firstName" label="First Name" required="true"    validation="required"  dataLocation="PNC.firstName"></TEXT>
+                                <TEXT type="text" id="lastName"  label="Last Name"  required="true"    validation="required"  dataLocation="PNC.LastName"></TEXT>
+                                <CIRCLE type="text" id="circle"  label="Circle"     required="true"    validation="required"  dataLocation="PNC.LastName"></CIRCLE>
+                                <SVG-HTML id="SVG-HTML" required="true"></SVG-HTML>
+                                <LIST type="ddl"  id="sex"       label="Sex"        required="false"   validation="sex"        dataLocation="PNC.sex" list="male,female"></LIST>
+                                <TEXT type="text" id="height"    label="Height"     required="false"   validation="sex"        dataLocation="PNC.sex"></TEXT>
                             </FORM>
                         </OPTION>
                         <OPTION id="byID" label="by Id">
@@ -62,31 +65,7 @@
     // clear items backwards, use treewalk, call event handler if exists
     // add target tag to CONFIG - ie: field goes here target?
 
-    var TemplateFactory = {
-        cache:{},
-        prefix:"template.",
-        /**
-         * Convert Template text into Javascript function,
-         * also caches compiled function for faster access
-         */
-        compile:function(name){
-            if(this.cache[name] == undefined){
-                var templateText = JS.DOM.getElement(this.prefix + name,true).innerHTML;
-                this.cache[name] = _.template(templateText);
-            }
-            return this.cache[name];
-        },
-        /**
-         *
-         */
-        render:function(templateName,json){
-            return this.compile(templateName)(json);
-        },
-        getTemplateFactory:function(prefix){
-            prefix = prefix || "";
-            return _.extend({},TemplateFactory,{prefix:prefix});
-        }
-    };
+
 
 
     function TLF_Factory(container,configContainerId,submitCallback){
@@ -104,25 +83,18 @@
             },
             populate:function(level,element,dataTag){
                 element = JS.DOM.getElement(element,true);
-                if(dataTag.tagName == "FORM"){
-                    this.populateForm(level,element,dataTag);
-                }else{
-                    var templateTypeName = dataTag.tagName;
-                    var html = TlfTemplateFactory.render(templateTypeName,{
-                        uuid: _.uniqueId(this.identifier),
-                        tlf:tlf,
-                        level:level,
-                        dataTag:dataTag
-                    });
-                    JS.DOM.createElement("span",{class:tlf.identifier,innerHTML:html,style:{display:"inlineBlock"}},element);
-                }
-            },
-            populateForm:function(level,element,dataTag){
-                var fields = JS.ARRAY.fromCollection(dataTag.children);
-                var mandatoryFields = _.findByAttributes(fields,"mandatory","true");
-                _.forEach(mandatoryFields,function(childDataTag){
-                    tlf.populate(level,element,childDataTag);
+                var templateTypeName = dataTag.tagName;
+                var postProcessing = [];
+                var html = TlfTemplateFactory.render(templateTypeName,{
+                    uuid: _.uniqueId(this.identifier),
+                    tlf:tlf,
+                    level:level,
+                    dataTag:dataTag,
+                    postProcessing:postProcessing
                 });
+                var newElement = JS.DOM.createElement("span",{class:tlf.identifier,innerHTML:html,style:{display:"inlineBlock"}},element);
+                _.forEach(postProcessing,function(func){func.apply()});
+                return newElement;
             },
             prefilterChanged:function(level,dataTag,value){
                 choices = choices.slice(0,level);
@@ -155,60 +127,25 @@
     };
 
 
-
-    /**
-     *
-     * @param func
-     * @param storageObject
-     * @param deleteAfterUse
-     * @returns {*}
-     */
-    function namedAnonymousFunction(func,storageObject,deleteAfterUse){
-        var f = func;
-        var name = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-            return v.toString(16);
-        });
-        storageObject = storageObject || window;
-        if(deleteAfterUse){
-            f = function(){
-                var args = Array.prototype.slice.apply(arguments);
-                setTimeout(function(){storageObject[name];},1)
-                return func.apply(this,args);
-            }
-        }
-        storageObject[name]=f;
-        return name;
-    }
-
-    (function(){
-        var n = namedAnonymousFunction(function(){
-            console.log("f has been run");
-        });
-//    setInterval(window[n],1000);
-    })();
-
-
 </script>
 
-<script src="js/lodash.compat.js"></script>
-<script src="js/JS.js"></script>
+
 
 
 <!-- TEMPLATE for DROP DOWN LIST-->
 <script type="text/html" id="template.DDL" vars="uuid,tfl,level,dataTag">
     <%
-        var childrenContainerId = "ddl_" + uuid;
-        var funcNameDDLChanged = namedAnonymousFunction(function(){
-            // remove all old descendants
-            var container = JS.DOM.getElement(childrenContainerId);
-            container.innerHTML = "";
-            // get selected value
-            var selectedValue = JS.DOM.FORM.getValue(this);
-            // populate new child
-            var childDataTag = dataTag.children.namedItem(selectedValue);
-            tlf.populate(level+1,container,childDataTag)
-        });
+    var childrenContainerId = "ddl_" + uuid;
+    var funcNameDDLChanged = namedAnonymousFunction(function(){
+    // remove all old descendants
+    var container = JS.DOM.getElement(childrenContainerId);
+    container.innerHTML = "";
+    // get selected value
+    var selectedValue = JS.DOM.FORM.getValue(this);
+    // populate new child
+    var childDataTag = dataTag.children.namedItem(selectedValue);
+    tlf.populate(level+1,container,childDataTag)
+    });
     %>
     <div class="" style="display: inline-block;border:1px solid red;">
         <input type="hidden" id="level<%=level%>" name="level<%=level%>" value="">
@@ -235,45 +172,46 @@
 </script>
 
 <!-- TEMPLATE for FORM & FIELDS -->
-<script type="text/html" id="template.FORM">
+<script type="text/html" id="template.FORM" vars="uuid,tlf,level,dataTag,postProcessing">
     <%
-    var uuid = JS.uuid();
-    var optionalUUID = "optional_"+uuid;
+    var mandatoryContainerId = "mandatory_" + uuid;
+    var optionalContainerId = "optional_" + uuid;
+    var mandatoryChildren = _.findByAttribute(dataTag.children,"required","true");
+    var optionalChildren = _.findByAttribute(dataTag.children,"required","false");
+    // build mandatory fields
+    postProcessing.push(function(){
+        var mandatoryContainer = JS.DOM.getElement(mandatoryContainerId);
+        _.forEach(mandatoryChildren,function(childDataTag){
+            tlf.populate(level,mandatoryContainer,childDataTag);
+        });
+    });
+    // optional fields event handler
+    var optionalFieldFuncName = namedAnonymousFunction(function(){
+        var selectElement = this;
+        var selectedValue = JS.DOM.FORM.getValue(selectElement);
+        if(selectedValue == "+"){return;}
+        var childDataTag = _.find(dataTag.children,{id:selectedValue});
+        tlf.populate(level,optionalContainerId,childDataTag);
+        // change select box back to "+"
+        selectElement.selectedIndex = 0;
+        selectElement.blur();
+        // TODO: remove option from optionals list?
+    });
     %>
     <div class="" style="display: inline-block;border:1px solid red;">
-        <div class="" style="display: inline-block;border:1px solid blue;">
-            <%
-            // get list of mandatory fields -> call template for each
-            %>
-
-            <% _.forEach(data.data.manditory,function(val,key,collection){
-            var html = tlf.getTemplate(val.elementType)(val);
-            %>
-            <%=html%>
-            <%});%>
-        </div>
-        <div id="<%= optionalUUID %>" class="" style="display: inline-block;border:1px solid yellow;">
-        </div>
-        <%
-        var optionalFieldFuncName = namedAnonymousFunction(function(){
-        var element = JS.DOM.getElement(this);
-        var selectedValue = JS.DOM.FORM.getValue(element);
-        if(selectedValue =="+")return;
-        var optionalContainer = JS.DOM.getElement(optionalUUID);
-        var d = _.find(data.data.optional,{id:selectedValue});
-        var html = tlf.getTemplate(d.elementType)(d);
-        var newElement = JS.DOM.createElement("span",{innerHTML:html,optional:true},optionalContainer);
-        element.selectedIndex = 0;
-        element.blur();
-        });
-        %>
+        <div id="<%= mandatoryContainerId %>" class="" style="display: inline-block;border:1px solid blue;"></div>
+        <div id="<%= optionalContainerId %>" class="" style="display: inline-block;border:1px solid yellow;"></div>
         <div class="" style="display: inline-block;border:1px solid yellow;">
-            <select style="width:50px;font-size: xx-large;" onfocus="this.style.width='200px';" onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
+            <select style="width:50px;font-size: xx-large;color:blue;" onfocus="this.style.width='200px';" onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
                 <option>+</option>
                 <optgroup label="Optional Fields">
-                    <% _.forEach(data.data.optional,function(val,key,collection){%>
-                    <option value="<%=val.id%>"><%=val.label%></option>
-                    <%});%>
+                    <%
+                    _.forEach(optionalChildren,function(childDataTag){
+                    %>
+                        <option value="<%=childDataTag.id%>"><%=childDataTag.label%></option>
+                    <%
+                    });
+                    %>
                 </optgroup>
             </select>
         </div>
@@ -294,9 +232,9 @@
 </script>
 
 <script type="text/html" id="template.SVG-HTML">
-    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
-        <foreignObject x="40" y="40" width="100" height="100" requiredExtensions="http://www.w3.org/1999/xhtml">
-            <div xmlns="http://www.w3.org/1999/xhtml">test</div>
+    <svg id="svg1" width="200" height="100" xmlns="http://www.w3.org/2000/svg">
+        <foreignObject x="0" y="0" width="200" height="100">
+            <span>goodbye cruel world</span>
         </foreignObject>
     </svg>
 </script>
