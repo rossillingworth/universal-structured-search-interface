@@ -26,8 +26,8 @@
                             <FORM>
                                 <TEXT type="text" id="firstName" label="First Name" required="true"    validation="required"  dataLocation="PNC.firstName"></TEXT>
                                 <TEXT type="text" id="lastName"  label="Last Name"  required="true"    validation="required"  dataLocation="PNC.LastName"></TEXT>
-                                <CIRCLE type="text" id="circle"  label="Circle"     required="true"    validation="required"  dataLocation="PNC.LastName"></CIRCLE>
-                                <SVG-HTML id="SVG-HTML" required="true"></SVG-HTML>
+                                <!--<CIRCLE type="text" id="circle"  label="Circle"     required="false"    validation="required"  dataLocation="PNC.LastName"></CIRCLE>-->
+                                <!--<SVG-HTML id="SVG-HTML" required="false"></SVG-HTML>-->
                                 <LIST type="ddl"  id="sex"       label="Sex"        required="false"   validation="sex"        dataLocation="PNC.sex" list="male,female"></LIST>
                                 <TEXT type="text" id="height"    label="Height"     required="false"   validation="sex"        dataLocation="PNC.sex"></TEXT>
                             </FORM>
@@ -92,9 +92,14 @@
                     dataTag:dataTag,
                     postProcessing:postProcessing
                 });
-                var newElement = JS.DOM.createElement("span",{class:tlf.identifier,innerHTML:html,style:{display:"inlineBlock"}},element);
+                var container = JS.DOM.createElement("div",{innerHTML:html});
+                var df = document.createDocumentFragment();
+                for (var i in container.children) {
+                    var childNode = container.children[i];
+                    childNode && childNode.tagName && df.appendChild(childNode);
+                }
+                element.appendChild(df.cloneNode(true));
                 _.forEach(postProcessing,function(func){func.apply()});
-                return newElement;
             },
             prefilterChanged:function(level,dataTag,value){
                 choices = choices.slice(0,level);
@@ -137,14 +142,14 @@
     <%
     var childrenContainerId = "ddl_" + uuid;
     var funcNameDDLChanged = namedAnonymousFunction(function(){
-    // remove all old descendants
-    var container = JS.DOM.getElement(childrenContainerId);
-    container.innerHTML = "";
-    // get selected value
-    var selectedValue = JS.DOM.FORM.getValue(this);
-    // populate new child
-    var childDataTag = dataTag.children.namedItem(selectedValue);
-    tlf.populate(level+1,container,childDataTag)
+        // remove all old descendants
+        var container = JS.DOM.getElement(childrenContainerId);
+        container.innerHTML = "";
+        // get selected value
+        var selectedValue = JS.DOM.FORM.getValue(this);
+        // populate new child
+        var childDataTag = dataTag.children.namedItem(selectedValue);
+        tlf.populate(level+1,container,childDataTag);
     });
     %>
     <div class="" style="display: inline-block;border:1px solid red;">
@@ -176,13 +181,14 @@
     <%
     var mandatoryContainerId = "mandatory_" + uuid;
     var optionalContainerId = "optional_" + uuid;
+    var childrenContainerId = "children_" + uuid;
     var mandatoryChildren = _.findByAttribute(dataTag.children,"required","true");
     var optionalChildren = _.findByAttribute(dataTag.children,"required","false");
     // build mandatory fields
     postProcessing.push(function(){
-        var mandatoryContainer = JS.DOM.getElement(mandatoryContainerId);
-        _.forEach(mandatoryChildren,function(childDataTag){
-            tlf.populate(level,mandatoryContainer,childDataTag);
+        var childContainer = JS.DOM.getElement(childrenContainerId);
+        _.forEach(dataTag.children,function(childDataTag){
+            tlf.populate(level,childContainer,childDataTag);
         });
     });
     // optional fields event handler
@@ -201,6 +207,7 @@
     <div class="" style="display: inline-block;border:1px solid red;">
         <div id="<%= mandatoryContainerId %>" class="" style="display: inline-block;border:1px solid blue;"></div>
         <div id="<%= optionalContainerId %>" class="" style="display: inline-block;border:1px solid yellow;"></div>
+        <div id="<%= childrenContainerId %>" class="" style="display: inline-block;border:1px solid yellow;"></div>
         <div class="" style="display: inline-block;border:1px solid yellow;">
             <select style="width:50px;font-size: xx-large;color:blue;" onfocus="this.style.width='200px';" onblur="this.style.width='60px';" onchange="window['<%=optionalFieldFuncName%>'].apply(this);">
                 <option>+</option>
@@ -225,8 +232,24 @@
     </div>
 </script>
 
+<script type="text/html" id="template.LIST">
+    <div class="" style="display: <%= (dataTag.getAttribute("required")=="true")?'inline-block':'none' %>;border:1px solid red;">
+        <label><%=dataTag.getAttribute("label")%></label><br/>
+        <select id="<%=dataTag.getAttribute('dataLocation')%>">
+            <%
+            var listArray = dataTag.getAttribute("list").split(",");
+            _.forEach(listArray,function(opt){
+            %>
+            <option value="<%=opt%>"><%=opt%></option>
+            <%
+            });
+            %>
+        </select>
+    </div>
+</script>
+
 <script type="text/html" id="template.CIRCLE">
-    <svg height="30">
+    <svg height="30" style="display: inline;">
         <circle cx="10" cy="10" r="10" stroke="green" stroke-width="4" fill="yellow" />
     </svg>
 </script>

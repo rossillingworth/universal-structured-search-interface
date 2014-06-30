@@ -78,7 +78,7 @@ var JS = {
          */
         getElement:function(element,assert){
             // assert
-            assert && JS.ASSERT.is((_.isString(element) || element.nodeType == 1),true,"getElement: bad element");
+            assert && JS.ASSERT.is(!!element && (_.isString(element) || element["nodeType"] == 1),true,"getElement: bad element");
             // assign
             var elementName = element;
             var element = (typeof element === "string")?document.getElementById(element):element;
