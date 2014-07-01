@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="js/lodash.compat.js"></script>
+</head>
+<body>
+
+<h1>Testing JS inheritance POC</h1>
+
+<script src="js/ExceptionExtensions.js"></script>
+
+<script>
+
+    // TODO - share prototypes
+
+
+    var CLASS = {
+        store:{
+
+        },
+        overrides:{
+
+        },
+        // create object
+        // create extends hierarchy - heirarchy of prototypes
+        // ?? create every time?
+        // ?? reuse previous prototypes
+        register:function(config){
+            var O = function(){};
+            // set prototype
+            if(config.extends){
+                EXCEPTION.when(!(!!CLASS.store[config.extends]),"No base instance of %s",config.extends);
+                O.prototype = CLASS.store[config.extends];
+            }
+            // add mixins
+            if(config.extendWith && config.extendWith.length > 0){
+                for(var i in config.extendWith){
+                    var extensionName = config.extendWith[i];
+                    var ref = CLASS.store[extensionName];
+                    EXCEPTION.when(!!ref,"No Mixin instance of %s",extensionName);
+                    _.extend(O,ref);
+                }
+            }
+            // implement overrides
+            var overrides = CLASS.overrides[config.name];
+            if(!!overrides){
+                for(var i in overrides){
+                    _.extend(O,overrides[i]);
+                }
+            }
+            // now add all other properties of config
+            _.extend(O,config);
+            CLASS.store[config.name] = O;
+        },
+        new:function(typeName,jsonConfig){
+            function O(){};
+            O.prototype = CLASS.store[typeName].prototype;
+            var o = new O();
+            _.extend(o,CLASS.store[typeName]);
+            o.init(jsonConfig);
+            return o;
+        },
+        override:function(name,jsonConfig){
+            // ensure named override container exists
+            !(!!CLASS.overrides[name]) && (CLASS.overrides[name] = []);
+            CLASS.overrides[name].push(jsonConfig);
+        }
+    };
+
+
+
+
+    //###################################################
+
+    CLASS.override("base",{
+        myVar:999,
+        getVar:function(){
+            console.log("getting");
+            return this.myVar;
+        }
+        ,setVar:function(val){
+            this.myVar = val;
+        }
+    });
+
+    CLASS.register({
+        name:"base"
+        ,extends:""
+        ,extendWith:[]
+        ,config:{}
+        ,myVarXXX:0
+        ,init:function(val){
+            console.log("init base");
+            this.myVarXXX = val;
+        }
+        ,func1:function (){
+            console.log("func1");
+        }
+    });
+
+    CLASS.register({
+        name:"extend1"
+        ,extends:"base"
+        ,init:function(){
+            console.log("init extend1");
+        }
+        ,func3:function(){
+            console.log("func3");
+        }
+    });
+
+    CLASS.register({
+        name:"extend2"
+        ,extends:"base"
+        ,extendWith:[]
+        ,init:function(){
+            this.prototype.init(777);
+            console.log("init extend2");
+            console.log(this.myVarXXX);
+        }
+    });
+
+    var b = CLASS.new("base",{});
+    console.log(b.getVar());
+    b.setVar(666);
+
+    var e = CLASS.new("extend1",{});
+    console.log(e.getVar())
+
+    console.log(b.getVar());
+
+    var e2 = CLASS.new("extend2",{});
+
+    // TODO - PROTOTYPE is SHARED
+
+</script>
+
+</body>
+</html>
