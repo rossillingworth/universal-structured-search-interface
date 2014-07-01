@@ -13,10 +13,16 @@
 <script>
 
     // TODO - share prototypes
+    // TODO - NEED an extend function that only takes if hasOwnProperty==true
+
+
+    // JS
+    // Constructor.prototype -> properties & methods added to instances of Object created with new Constructor
+
 
 
     var CLASS = {
-        store:{
+        constructors:{
 
         },
         overrides:{
@@ -27,43 +33,51 @@
         // ?? create every time?
         // ?? reuse previous prototypes
         register:function(config){
+            // create constructor
             var O = function(){};
-            // set prototype
+            // set prototype, this will be shared??
             if(config.extends){
-                EXCEPTION.when(!(!!CLASS.store[config.extends]),"No base instance of %s",config.extends);
-                O.prototype = CLASS.store[config.extends];
+                EXCEPTION.when(!(!!CLASS.constructors[config.extends]),"No base instance of %s",config.extends);
+                O.prototype = new CLASS.constructors[config.extends]();
+            }else{
+                O.prototype = Object.prototype;
             }
             // add mixins
             if(config.extendWith && config.extendWith.length > 0){
                 for(var i in config.extendWith){
                     var extensionName = config.extendWith[i];
-                    var ref = CLASS.store[extensionName];
-                    EXCEPTION.when(!!ref,"No Mixin instance of %s",extensionName);
-                    _.extend(O,ref);
+                    var extensionConstructor = CLASS.constructors[extensionName];
+                    EXCEPTION.when(!!extensionConstructor,"No Mixin instance of %s",extensionName);
+                    _.extend(O.prototype,new extensionConstructor());
                 }
             }
             // implement overrides
             var overrides = CLASS.overrides[config.name];
             if(!!overrides){
                 for(var i in overrides){
-                    _.extend(O,overrides[i]);
+                    _.extend(O.prototype,overrides[i]);
                 }
             }
-            // now add all other properties of config
-            _.extend(O,config);
-            CLASS.store[config.name] = O;
+            // now add all other config properties
+            _.extend(O.prototype,config);
+            CLASS.constructors[config.name] = O;
         },
         new:function(typeName,jsonConfig){
-            function O(){};
-            O.prototype = CLASS.store[typeName].prototype;
-            var o = new O();
-            _.extend(o,CLASS.store[typeName]);
-            o.init(jsonConfig);
+            var o = new CLASS.constructors[typeName]();
+            !!o.init &&  o.init(jsonConfig);
             return o;
         },
+        /**
+         * Used to extend/modify functionality of any component
+         * without touching the source code.
+         * ie: temporary
+         *
+         * @param name
+         * @param jsonConfig
+         */
         override:function(name,jsonConfig){
             // ensure named override container exists
-            !(!!CLASS.overrides[name]) && (CLASS.overrides[name] = []);
+            !CLASS.overrides[name] && (CLASS.overrides[name] = []);
             CLASS.overrides[name].push(jsonConfig);
         }
     };
@@ -76,7 +90,7 @@
     CLASS.override("base",{
         myVar:999,
         getVar:function(){
-            console.log("getting");
+            console.log("getting " + this.myVar);
             return this.myVar;
         }
         ,setVar:function(val){
@@ -115,7 +129,14 @@
         ,extends:"base"
         ,extendWith:[]
         ,init:function(){
-            this.prototype.init(777);
+            console.log("__proto__",this.__proto__);
+            debugger;
+            this.__proto__.__proto__.init(777);
+            var p = this.__proto__;
+            while(!p.name=="base"){
+                p = p.__proto__;
+            }
+
             console.log("init extend2");
             console.log(this.myVarXXX);
         }
