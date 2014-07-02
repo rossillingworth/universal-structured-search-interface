@@ -22,46 +22,71 @@
 
 
     var CLASS = {
-        constructors:{
-
-        },
-        overrides:{
-
-        },
+        // collection of constructor functions
+        constructors:{},
+        overrides:{},
+        mixins:{},
         // create object
         // create extends hierarchy - heirarchy of prototypes
         // ?? create every time?
         // ?? reuse previous prototypes
         register:function(config){
+
+            // hidden config, allows override on underlying prototype
+            var underlyingPrototype = config.underlyingPrototype || Object.prototype;
+            var allowParentConstructor = !!config.allowParentConstructor;
+
+            // get base class constructor
+            var baseName = config.extends;
+            var baseConstructor = CLASS.constructors[baseName];
+            EXCEPTION.when(!!baseName && !(!!baseConstructor),"No base instance of %s",baseName);
+
             // create constructor
-            var O = function(){};
-            // set prototype, this will be shared??
-            if(config.extends){
-                EXCEPTION.when(!(!!CLASS.constructors[config.extends]),"No base instance of %s",config.extends);
-                O.prototype = new CLASS.constructors[config.extends]();
-            }else{
-                O.prototype = Object.prototype;
-            }
-            // add mixins
+            function INHERITANCE(){
+                console.log("Inheritance for " + config.extends);
+            };
+            function CONSTRUCTOR(){
+                console.log("Constructor for " + config.extends);
+                // TODO - should this be possible to override in the config
+                // !!config.constructor && config.constructor.apply(this,[].slice.apply(arguments));
+                // allowParentConstructor && baseConstructor.prototype.constructor.apply(this,[].slice.apply(arguments));
+                // TODO - should we call init from here?
+                // this.init.apply(this,[].slice.apply(arguments));
+            };
+
+            // assign (base prototype or Object.prototype) to our intermediary prototype
+            // inherit baseConstructor prototype without creating an instance on baseConstructor
+            // this is also done to avoid polluting the baseConstructor.prototype
+            INHERITANCE.prototype = baseConstructor ? baseConstructor.prototype : underlyingPrototype;
+            CONSTRUCTOR.prototype = new INHERITANCE();
+            CONSTRUCTOR.prototype.constructor = CONSTRUCTOR;
+            // TODO - assign _super? - already available with prototype
+            // TODO - assign _superConstructor?
+
+            // decorate constructor with specified mixins
+            // TODO - should construtors be allowed in mixins?
             if(config.extendWith && config.extendWith.length > 0){
                 for(var i in config.extendWith){
                     var extensionName = config.extendWith[i];
                     var extensionConstructor = CLASS.constructors[extensionName];
                     EXCEPTION.when(!!extensionConstructor,"No Mixin instance of %s",extensionName);
-                    _.extend(O.prototype,new extensionConstructor());
+                    _.extend(CONSTRUCTOR.prototype,new extensionConstructor());
                 }
             }
+
             // implement overrides
             var overrides = CLASS.overrides[config.name];
             if(!!overrides){
                 for(var i in overrides){
-                    _.extend(O.prototype,overrides[i]);
+                    _.extend(CONSTRUCTOR.prototype,overrides[i]);
                 }
             }
+
             // now add all other config properties
-            _.extend(O.prototype,config);
-            CLASS.constructors[config.name] = O;
+            _.extend(CONSTRUCTOR.prototype,config);
+            CLASS.constructors[config.name] = CONSTRUCTOR;
         },
+
         new:function(typeName,jsonConfig){
             var o = new CLASS.constructors[typeName]();
             !!o.init &&  o.init(jsonConfig);
@@ -98,6 +123,7 @@
         }
     });
 
+    // TODO - put config into sub object is JSON
     CLASS.register({
         name:"base"
         ,extends:""
