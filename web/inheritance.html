@@ -9,6 +9,7 @@
 <h1>Testing JS inheritance POC</h1>
 
 <script src="js/ExceptionExtensions.js"></script>
+<script src="js/JS.js"></script>
 
 <script>
 
@@ -40,13 +41,14 @@
 
             // get base class constructor
             var baseName = config.extends;
-            var baseConstructor = CLASS.constructors[baseName];
+            var baseConstructor = JS.OBJECT.getProperty(window,baseName);
             EXCEPTION.when(!!baseName && !(!!baseConstructor),"No base instance of %s",baseName);
 
             // create constructor
-            function INHERITANCE(){
+            function PROTOTYPE(){
                 console.log("Inheriting from " + this + " to " + config.name);
             };
+
             function CONSTRUCTOR(){
                 console.log("Constructor for " + config.name);
                 // TODO - should this be possible to override in the config
@@ -59,20 +61,22 @@
             // assign (base prototype or Object.prototype) to our intermediary prototype
             // inherit baseConstructor prototype without creating an instance on baseConstructor
             // this is also done to avoid polluting the baseConstructor.prototype
-            INHERITANCE.prototype = baseConstructor ? baseConstructor.prototype : underlyingPrototype;
-            CONSTRUCTOR.prototype = new INHERITANCE();
+            PROTOTYPE.prototype = baseConstructor ? baseConstructor.prototype : underlyingPrototype;
+            CONSTRUCTOR.prototype = new PROTOTYPE();
             CONSTRUCTOR.prototype.constructor = CONSTRUCTOR;
             // TODO - assign _super? - already available with prototype
             // TODO - assign _superConstructor?
 
             // decorate constructor with specified mixins
-            // TODO - should construtors be allowed in mixins?
-            if(config.extendWith && config.extendWith.length > 0){
-                for(var i in config.extendWith){
-                    var extensionName = config.extendWith[i];
-                    var extensionConstructor = CLASS.constructors[extensionName];
-                    EXCEPTION.when(!!extensionConstructor,"No Mixin instance of %s",extensionName);
-                    _.extend(CONSTRUCTOR.prototype,new extensionConstructor());
+            if(config.mixins && config.mixins.length > 0){
+                for(var i in config.mixins){
+                    var mixinName = config.mixins[i];
+                    // get mixin from global scope reference
+                    var mixin = JS.OBJECT.getProperty(window,mixinName);
+                    EXCEPTION.when(!mixin,"No instance of mixin found:  %s",mixinName);
+                    // convert constructor to object if need to
+                    _.isFunction(mixin) && (mixin = new mixin());
+                    _.extend(CONSTRUCTOR.prototype,mixin);
                 }
             }
 
@@ -85,8 +89,10 @@
             }
 
             // now add all other config properties
-            _.extend(CONSTRUCTOR.prototype,config);
-            CLASS.constructors[config.name] = CONSTRUCTOR;
+            _.extend(CONSTRUCTOR.prototype,json);
+
+            // push CONSTRUCTOR to global namespace
+            JS.OBJECT.setProperty(window,config.name,CONSTRUCTOR);
         },
 
         new:function(typeName,jsonConfig){
@@ -114,23 +120,33 @@
 
     //###################################################
 
-//    CLASS.override("base",{
-//        myVar:999,
-//        getVar:function(){
-//            console.log("getting myVar: " + this.myVar);
-//            return this.myVar;
-//        }
-//        ,setVar:function(val){
-//            this.myVar = val;
-//        }
-//    });
+    CLASS.override("ross.Base",{
+        myVar:999,
+        getVar:function(){
+            console.log("getting myVar: " + this.myVar);
+            return this.myVar;
+        }
+        ,setVar:function(val){
+            this.myVar = val;
+        }
+    });
+
+    var mixins = {
+        test1:{
+            testFunc1:function testFunc1(){console.log("testFunc1");}
+        },
+        test2:function(){
+            this.testFunc2 = function testFunc2(){console.log("testFunc2");};
+            function testFunc3(){console.log("testFunc3");};
+        }
+    };
 
     // TODO - put config into sub object is JSON
     CLASS.register({
         specification:{
-            name:"base"
+            name:"ross.Base"
             ,extends:""
-            ,extendWith:[]
+            ,mixins:["mixins.test1","mixins.test2"]
         }
         ,myVarXXX:0
         ,init:function(val){
@@ -142,18 +158,18 @@
         }
     });
 
-//    CLASS.register({
-//        specification:{
-//            name:"extend1"
-//            ,extends:"base"
-//        }
-//        ,init:function(){
-//            console.log("init extend1");
-//        }
-//        ,func3:function(){
-//            console.log("func3");
-//        }
-//    });
+    CLASS.register({
+        specification:{
+            name:"ross.Extend1"
+            ,extends:"ross.Base"
+        }
+        ,init:function(){
+            console.log("init extend1");
+        }
+        ,func3:function(){
+            console.log("func3");
+        }
+    });
 //
 //    CLASS.register({
 //        specification:{
@@ -178,9 +194,21 @@
 //    });
 
 //    var b = CLASS.new("base",{});
-    var bb = new CLASS.constructors.base()
 //    console.log(b.getVar());
 //    b.setVar(666);
+
+//    var bb = new CLASS.constructors.base()
+
+    var bbb = new ross.Base();
+    bbb.func1();
+    console.log(bbb.getVar());
+    bbb.setVar(111);
+
+    var ee = new ross.Extend1();
+    ee.func1();
+    ee.func3();
+    console.log(ee.getVar());
+    ee.setVar(111);
 
 //    var e = CLASS.new("extend1",{});
 //    console.log(e.getVar())
