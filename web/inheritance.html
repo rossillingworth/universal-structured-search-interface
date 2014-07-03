@@ -30,7 +30,9 @@
         // create extends hierarchy - heirarchy of prototypes
         // ?? create every time?
         // ?? reuse previous prototypes
-        register:function(config){
+        register:function(json){
+
+            var config = json.specification;
 
             // hidden config, allows override on underlying prototype
             var underlyingPrototype = config.underlyingPrototype || Object.prototype;
@@ -43,10 +45,10 @@
 
             // create constructor
             function INHERITANCE(){
-                console.log("Inheritance for " + config.extends);
+                console.log("Inheriting from " + this + " to " + config.name);
             };
             function CONSTRUCTOR(){
-                console.log("Constructor for " + config.extends);
+                console.log("Constructor for " + config.name);
                 // TODO - should this be possible to override in the config
                 // !!config.constructor && config.constructor.apply(this,[].slice.apply(arguments));
                 // allowParentConstructor && baseConstructor.prototype.constructor.apply(this,[].slice.apply(arguments));
@@ -112,23 +114,24 @@
 
     //###################################################
 
-    CLASS.override("base",{
-        myVar:999,
-        getVar:function(){
-            console.log("getting " + this.myVar);
-            return this.myVar;
-        }
-        ,setVar:function(val){
-            this.myVar = val;
-        }
-    });
+//    CLASS.override("base",{
+//        myVar:999,
+//        getVar:function(){
+//            console.log("getting myVar: " + this.myVar);
+//            return this.myVar;
+//        }
+//        ,setVar:function(val){
+//            this.myVar = val;
+//        }
+//    });
 
     // TODO - put config into sub object is JSON
     CLASS.register({
-        name:"base"
-        ,extends:""
-        ,extendWith:[]
-        ,config:{}
+        specification:{
+            name:"base"
+            ,extends:""
+            ,extendWith:[]
+        }
         ,myVarXXX:0
         ,init:function(val){
             console.log("init base");
@@ -139,45 +142,52 @@
         }
     });
 
-    CLASS.register({
-        name:"extend1"
-        ,extends:"base"
-        ,init:function(){
-            console.log("init extend1");
-        }
-        ,func3:function(){
-            console.log("func3");
-        }
-    });
+//    CLASS.register({
+//        specification:{
+//            name:"extend1"
+//            ,extends:"base"
+//        }
+//        ,init:function(){
+//            console.log("init extend1");
+//        }
+//        ,func3:function(){
+//            console.log("func3");
+//        }
+//    });
+//
+//    CLASS.register({
+//        specification:{
+//            name:"extend2"
+//            ,extends:"base"
+//            ,extendWith:[]
+//        }
+//        ,init:function(){
+//            console.log("__proto__",this.__proto__);
+//            debugger;
+////            this.__proto__.__proto__.init(777);
+//            this.prototype.prototype.init(777);
+//            // TODO - this is failing
+//            var p = this.__proto__;
+//            while(!p.name=="base"){
+//                p = p.__proto__;
+//            }
+//
+//            console.log("init extend2");
+//            console.log(this.myVarXXX);
+//        }
+//    });
 
-    CLASS.register({
-        name:"extend2"
-        ,extends:"base"
-        ,extendWith:[]
-        ,init:function(){
-            console.log("__proto__",this.__proto__);
-            debugger;
-            this.__proto__.__proto__.init(777);
-            var p = this.__proto__;
-            while(!p.name=="base"){
-                p = p.__proto__;
-            }
+//    var b = CLASS.new("base",{});
+    var bb = new CLASS.constructors.base()
+//    console.log(b.getVar());
+//    b.setVar(666);
 
-            console.log("init extend2");
-            console.log(this.myVarXXX);
-        }
-    });
-
-    var b = CLASS.new("base",{});
-    console.log(b.getVar());
-    b.setVar(666);
-
-    var e = CLASS.new("extend1",{});
-    console.log(e.getVar())
-
-    console.log(b.getVar());
-
-    var e2 = CLASS.new("extend2",{});
+//    var e = CLASS.new("extend1",{});
+//    console.log(e.getVar())
+//
+//    console.log(b.getVar());
+//
+//    var e2 = CLASS.new("extend2",{});
 
     // TODO - PROTOTYPE is SHARED
 
