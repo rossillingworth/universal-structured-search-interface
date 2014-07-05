@@ -77,13 +77,14 @@ var JS = {
          * @return {Element}
          */
         getElement:function(element,assert){
-            // assert
+            assert = Boolean(assert);
+            // validate input
             assert && JS.ASSERT.is(!!element && (_.isString(element) || element["nodeType"] == 1),true,"getElement: bad element");
             // assign
             var elementName = element;
             var element = (typeof element === "string")?document.getElementById(element):element;
-            // assert result
-            !!assert && JS.ASSERT.is(!!element && element.nodeType == 1,true,"getElement: unable to find element: " + elementName);
+            // validate result
+            assert && JS.ASSERT.is(!!element && element.nodeType == 1,true,"getElement: unable to find element: " + elementName);
             // return element
             return element;
         }
@@ -429,7 +430,7 @@ var JS = {
     ,ARRAY:{
         fromCollection:function(collectionObj){
             try{
-                // IE8 has broken this...!
+                // TODO - IE8 has broken this...!
                 return Array.prototype.slice.call(collectionObj)
             }catch(ex){
                 //so we need this

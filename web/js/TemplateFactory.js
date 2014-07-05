@@ -20,16 +20,35 @@ if(!(!!JS && !!_)){
 var TemplateFactory = {
     cache:{},
     prefix:"template.",
+    dir:"js/templates/",
     /**
      * Convert Template text into Javascript function,
      * also caches compiled function for faster access
      */
     compile:function(name){
         if(this.cache[name] == undefined){
-            var templateText = JS.DOM.getElement(this.prefix + name,true).innerHTML;
+            var templateName = this.prefix + name;
+            var templateElement = JS.DOM.getElement(templateName);
+            var templateText = "";
+            if(!!templateElement){
+                templateText = templateElement.innerHTML;
+            }else{
+                templateText = this.loadTemplate(templateName);
+            }
             this.cache[name] = _.template(templateText);
         }
         return this.cache[name];
+    },
+    loadTemplate:function(name){
+        var request = new XMLHttpRequest();
+        var path = this.dir + name + ".html";
+        request.open("GET",path,false);
+        request.send();
+        if(request.readyState == 4 && request.status == 200){
+            return request.responseText;
+        }else{
+            alert("Failed to load: " + name)
+        }
     },
     /**
      *

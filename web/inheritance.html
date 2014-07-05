@@ -3,13 +3,15 @@
 <head>
     <title></title>
     <script src="js/lodash.compat.js"></script>
+    <script src="js/ExceptionExtensions.js"></script>
+    <script src="js/JS.js"></script>
+    <script src="js/class.js"></script>
 </head>
 <body>
 
 <h1>Testing JS inheritance POC</h1>
 
-<script src="js/ExceptionExtensions.js"></script>
-<script src="js/JS.js"></script>
+
 
 <script>
 
@@ -22,104 +24,11 @@
 
 
 
-    var CLASS = {
-        // collection of constructor functions
-        constructors:{},
-        overrides:{},
-        mixins:{},
-        // create object
-        // create extends hierarchy - heirarchy of prototypes
-        // ?? create every time?
-        // ?? reuse previous prototypes
-        register:function(json){
-
-            var config = json.specification;
-
-            // hidden config, allows override on underlying prototype
-            var underlyingPrototype = config.underlyingPrototype || Object.prototype;
-            var allowParentConstructor = !!config.allowParentConstructor;
-
-            // get base class constructor
-            var baseName = config.extends;
-            var baseConstructor = JS.OBJECT.getProperty(window,baseName);
-            EXCEPTION.when(!!baseName && !(!!baseConstructor),"No base instance of %s",baseName);
-
-            // create constructor
-            function PROTOTYPE(){
-                console.log("Inheriting from " + this + " to " + config.name);
-            };
-
-            function CONSTRUCTOR(){
-                console.log("Constructor for " + config.name);
-                // TODO - should this be possible to override in the config
-                // !!config.constructor && config.constructor.apply(this,[].slice.apply(arguments));
-                // allowParentConstructor && baseConstructor.prototype.constructor.apply(this,[].slice.apply(arguments));
-                // TODO - should we call init from here?
-                // this.init.apply(this,[].slice.apply(arguments));
-            };
-
-            // assign (base prototype or Object.prototype) to our intermediary prototype
-            // inherit baseConstructor prototype without creating an instance on baseConstructor
-            // this is also done to avoid polluting the baseConstructor.prototype
-            PROTOTYPE.prototype = baseConstructor ? baseConstructor.prototype : underlyingPrototype;
-            CONSTRUCTOR.prototype = new PROTOTYPE();
-            CONSTRUCTOR.prototype.constructor = CONSTRUCTOR;
-            // TODO - assign _super? - already available with prototype
-            // TODO - assign _superConstructor?
-
-            // decorate constructor with specified mixins
-            if(config.mixins && config.mixins.length > 0){
-                for(var i in config.mixins){
-                    var mixinName = config.mixins[i];
-                    // get mixin from global scope reference
-                    var mixin = JS.OBJECT.getProperty(window,mixinName);
-                    EXCEPTION.when(!mixin,"No instance of mixin found:  %s",mixinName);
-                    // convert constructor to object if need to
-                    _.isFunction(mixin) && (mixin = new mixin());
-                    _.extend(CONSTRUCTOR.prototype,mixin);
-                }
-            }
-
-            // implement overrides
-            var overrides = CLASS.overrides[config.name];
-            if(!!overrides){
-                for(var i in overrides){
-                    _.extend(CONSTRUCTOR.prototype,overrides[i]);
-                }
-            }
-
-            // now add all other config properties
-            _.extend(CONSTRUCTOR.prototype,json);
-
-            // push CONSTRUCTOR to global namespace
-            JS.OBJECT.setProperty(window,config.name,CONSTRUCTOR);
-        },
-
-        new:function(typeName,jsonConfig){
-            var o = new CLASS.constructors[typeName]();
-            !!o.init &&  o.init(jsonConfig);
-            return o;
-        },
-        /**
-         * Used to extend/modify functionality of any component
-         * without touching the source code.
-         * ie: temporary
-         *
-         * @param name
-         * @param jsonConfig
-         */
-        override:function(name,jsonConfig){
-            // ensure named override container exists
-            !CLASS.overrides[name] && (CLASS.overrides[name] = []);
-            CLASS.overrides[name].push(jsonConfig);
-        }
-    };
-
-
-
-
     //###################################################
 
+    /**
+     *
+     */
     CLASS.override("ross.Base",{
         myVar:999,
         getVar:function(){
@@ -131,13 +40,19 @@
         }
     });
 
+    /**
+     * Mixins can be function or Objects
+     * If a function, a new instance is created, and the object is used
+     */
     var mixins = {
         test1:{
-            testFunc1:function testFunc1(){console.log("testFunc1");}
+            mixinVar1:111,
+            mixinFunc1:function mixinFunc1(){console.log("testFunc1");}
         },
         test2:function(){
-            this.testFunc2 = function testFunc2(){console.log("testFunc2");};
-            function testFunc3(){console.log("testFunc3");};
+            this.mixinVar2 = 222;
+            this.mixinFunc2 = function mixinFunc2(){console.log("testFunc2");};
+            function mixinFunc3(){console.log("testFunc3");};
         }
     };
 
@@ -147,8 +62,14 @@
             name:"ross.Base"
             ,extends:""
             ,mixins:["mixins.test1","mixins.test2"]
+            ,defaultConfig:{
+
+            }
         }
         ,myVarXXX:0
+        ,constructor:function(config){
+            console.log("my CONSTRUCTOR for ross.BASE called");
+        }
         ,init:function(val){
             console.log("init base");
             this.myVarXXX = val;
@@ -162,6 +83,10 @@
         specification:{
             name:"ross.Extend1"
             ,extends:"ross.Base"
+        }
+        ,constructor:function(){
+            console.log("my CONSTRUCTOR for ross.Extend1 called");
+            debugger;
         }
         ,init:function(){
             console.log("init extend1");
