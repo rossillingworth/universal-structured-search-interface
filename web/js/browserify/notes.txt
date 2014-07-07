@@ -1,0 +1,7 @@
+
+
+npm install hbsfy
+browserify -t hbsfy main.js > bundle.js
+
+https://github.com/epeli/node-hbsfy
+

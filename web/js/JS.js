@@ -787,10 +787,18 @@ var JS = {
  * property - name of attribute to check
  * values   - single value, or array of values to check against
  */
+
+_.mixin({
+    'filterByAttribute': function(collection, property, values) {
+        var args = [property].concat(_.isArray(values)?values:[values]);
+        return _.filter(collection, JS.ARRAY.FILTERS.isElementAttribute.apply(null,args));
+    }
+});
+
 _.mixin({
     'findByAttribute': function(collection, property, values) {
         var args = [property].concat(_.isArray(values)?values:[values]);
-        return _.filter(collection, JS.ARRAY.FILTERS.isElementAttribute.apply(null,args));
+        return _.find(collection, JS.ARRAY.FILTERS.isElementAttribute.apply(null,args));
     }
 });
 

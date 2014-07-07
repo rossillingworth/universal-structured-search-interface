@@ -56,8 +56,14 @@ var TemplateFactory = {
     render:function(templateName,json){
         return this.compile(templateName)(json);
     },
-    getTemplateFactory:function(prefix){
-        prefix = prefix || "";
-        return _.extend({},TemplateFactory,{prefix:prefix});
+    /**
+     * Get a custom template factory instance
+     * available properties to modify: prefix, dir
+     *
+     * @param json
+     * @returns {void|*}
+     */
+    getTemplateFactory:function(json){
+        return _.extend({},TemplateFactory,json);
     }
 };

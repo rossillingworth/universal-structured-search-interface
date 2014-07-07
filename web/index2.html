@@ -71,7 +71,7 @@
     function TLF_Factory(container,configContainerId,submitCallback){
 
         var choices = [];
-        var TlfTemplateFactory = TemplateFactory.getTemplateFactory("template.");
+        var TlfTemplateFactory = TemplateFactory.getTemplateFactory({prefix:"template."});
 
         var tlf = {
             identifier:"TLF",

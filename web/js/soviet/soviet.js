@@ -20,6 +20,7 @@ SOVIET.register("OPTION",null,{}); // no template added, but handler used
 
 
 var SOVIET = {
+    templateFactory:TemplateFactory.Factory({}),
     tags:{
         //demo:{templateName:"",handler:function(){}}
     },
@@ -52,58 +53,119 @@ var SOVIET = {
         this.tags[tagName] = {templateName:templateName,handler:handler};
     },
     start:function(){
-        // TODO - require shim for getElementsByClassName
-        var topLevelDataTags = document.getElementsByClassName("soviet")
-        for(var dataTag in topLevelDataTags){
-            this.startOne(dataTag);
+        if(arguments[0]==undefined){
+            // iterate all identified top level dataTags
+            var topLevelDataTags = document.getElementsByClassName("soviet")
+            for(var dataTag in topLevelDataTags){
+                this.start(dataTag);
+            }
+        }else{
+            var dataTag = JS.DOM.getElement(arguments[0],true);
+            var targetContainer = null;
+            if(dataTag.hasAttribute("target")){
+                targetContainer = JS.DOM.getElement(dataTag.getAttribute("target"));
+            }else{
+                // TODO - should we remove dataTags fom DOM here?
+                targetContainer = JS.DOM.createElement("span",{},dataTag.parentNode);
+            }
+            this.populate(dataTag,container);
         }
     },
-    startOne:function(dataTag){
-        // if container is spec'd, use it, else inject a span by default (configurable)
-        //
-        var configContainer = JS.DOM.getElement(configContainerId,true);
-        var dataTag = JS.DOM.getElement(dataTag,true);
-
-        tlf.populate(0,container,dataTag);
-
-        // identify tag type
-        //  get template/handler pair
-        //  populate t/h to container
-
-        // handler knows of dataTag & DOM elements
-
-        // when an event occurs...
-        // DD node identifies dataTag selected
-
-        // SOVIET.populate(dataTag,targetContainer,parentHandler) -> Handler Instance
-        // SOVIET identifies template/Handler
-        // populate template {dataTag,Handler,UUID} into DF
-        // run Handler.postProcess + bind event handlers
-        // return Handler instance
-        //
-
-        // DOM events can now trigger functions in  handlers
-        // Handler now controls process
-
-        // MVC
-        // MODEL - dataTags
-        // View - Tempaltes
-        // Controller - Handler
-
-        // Handler API
-        // getChildren - returns children list
-        // delete - sends delete to all children, then deletes itself, undoes all bindings
-        // .... events: eg:
-        // onSelected
-        // onChange
-        //
-
-        // SOVIET - trigger: populate DOM with View+Model, binds controller to DOM
-        // Data - configures Handler, + custom event bindings
-        // Handler - configured by Model, controls view
-        // View - changes trigger handler methods
+    /**
+     *
+     */
+    populate:function(dataTag,targetElement){
+        // DbC & assignments
+        var name = dataTag.tagName;
+        Exception.when(!this.tags[name],"Custom Tag[%s] has no registered Template/Handler",name);
+        targetElement = JS.DOM.getElement(targetElement,true);
+        // identify handler
+        var pair = this.tags[name];
+        var templateName = pair.templateName;
+        var handlerConstructor = pair.handler;
+        // create handler instance
+        var handler = new handlerConstructor();
+        var postProcessing = [];
+        // push HTML to DOM node
+        var html = TemplateFactory.render(templateName,{
+            uuid: _.uniqueId(templateName),
+            dataTag:dataTag,
+            postProcessing:postProcessing
+        });
+        var container = JS.DOM.createElement("div",{innerHTML:html});
+        // transfer DOM output to a document fragment
+        var df = document.createDocumentFragment();
+        var childNodes =
+        for (var i in container.children) {
+            var childNode = container.children[i];
+            childNode && childNode.tagName && df.appendChild(childNode);
+        }
+        // do any post processing
+        hander.after(df);
+        _.forEach(postProcessing,function(func){func.apply()});
+        // now push document fragment to DOM
+        targetElement.appendChild(df.cloneNode(true));
     }
 }
+
+
+// TODO - move this to an underscore function?
+var SovietBase = {
+    components:{},
+    children:[], // references to child handlers
+    getBindReference:function(fragment,bindId){
+        var fragmentNodes = fragment.getElementsByTagName("*");
+        _.findByAttribute(fragmentNodes,"bindId",bindId);
+    },
+    delete:function(){
+        _.forEach(children,function(child){!!child.delete && child.delete()});
+        _.forEach(components,function(c){c.parentNode.removeChild(c);});
+    }
+};
+
+<script>
+    <div id="" bindId="bind1">
+        <input type="text" bindId="">
+    </div>
+<script>
+
+
+// identify tag type
+//  get template/handler pair
+//  populate t/h to container
+
+// handler knows of dataTag & DOM elements
+
+// when an event occurs...
+// DD node identifies dataTag selected
+
+// SOVIET.populate(dataTag,targetContainer,parentHandler) -> Handler Instance
+// SOVIET identifies template/Handler
+// populate template {dataTag,Handler,UUID} into DF
+// run Handler.postProcess + bind event handlers
+// return Handler instance
+//
+
+// DOM events can now trigger functions in  handlers
+// Handler now controls process
+
+// MVC
+// MODEL - dataTags
+// View - Tempaltes
+// Controller - Handler
+
+// Handler API
+// getChildren - returns children list
+// delete - sends delete to all children, then deletes itself, undoes all bindings
+// .... events: eg:
+// onSelected
+// onChange
+//
+
+// SOVIET - trigger: populate DOM with View+Model, binds controller to DOM
+// Data - configures Handler, + custom event bindings
+// Handler - configured by Model, controls view
+// View - changes trigger handler methods
 
 
 // TODO - onDomLoad="SOVIET.start();"
