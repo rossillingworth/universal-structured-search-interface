@@ -16,35 +16,28 @@ var Loader = {
         debugger;
         throw new Error(msg);
     }
-}
+};
 
-function addExecScope(json,func,args){
 
-    func.apply(args);
-}
-
-function require(name){
+function require(name,path){
 
     // startwith ./ -> local file, so add .js
     // ? can we set scope to allow chaining?
 
-    if(this["_requirePath"] != undefined){
-        alert("file scope defined: " + _requirePath);
-        name = this["_requirePath"] + name;
-    }
+    path = path || "";
+    name = path + name;
 
     var module = {};
     var contents = Loader.load(name);
 
+    var path = name.split("/").slice(0,-1).join("/") + "/";
+    var funcDef = JS.STRING.format("function require(name){return window.require(name,'%1')};",path);
 
-//    var funcDef = JS.STRING.format("var require = function(name){return window.require(name,%s)}",path);
+    funcDef += "\n" + contents;
+    console.log(funcDef);
 
-    (function addPathToScope(func){
-        this._requirePath = name.split("/").slice(0,-1).join("/") + "/";
-        var f = new Function('module',contents);
-        f.prototype.require = function(){alert("sub-require called");};
-        f(module);
-    })();
+    var f = new Function('module', funcDef);
+    f(module);
 
     // return module exports
     return module.exports;
