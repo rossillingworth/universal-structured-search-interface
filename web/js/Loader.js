@@ -3,12 +3,13 @@
  */
 
 var Loader = {
+    deubg:false,
     dir:"",
     suffix:"",
     load:function load(name){
         var request = new XMLHttpRequest();
         var path = this.dir + name + this.suffix;
-        console.log("loading: " + path);
+        this.debug && console.log("Loader: loading " + path);
         request.open("GET",path,false);
         request.send();
         if(request.readyState == 4 && request.status == 200){

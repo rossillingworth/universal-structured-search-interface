@@ -16,26 +16,29 @@ function require(name,path){
         load:function(name,path){
 
             // initialise environment
-            !this.loading && (this.loading = []);
+            !this.loading && (this.loading = {});
             !this.loader && (this.loader = Loader.Factory({suffix:".js"}));
 
             // check if already loading ie: circular references
             if(this.loading[name]){
-                throw new Error("Circular Reference: already loading " + name);
+                var msg = "Circular Reference: already loading " + name;
+                alert(msg);
+                debugger;
+                throw new Error(msg);
             }
 
             var directory = path.split("/").slice(0,-1).join("/") + "/";
 
             var funcDef = this.loader.load(path);
-            funcDef += "//path: "+ directory +"\n" + funcDef;
+            funcDef = "//path: "+ directory +"\n" + funcDef;
 
-            var requireOverride = function r(name){return require(name,directory)};
+            var requireOverride = function(name){return require(name,directory)};
             var module = {exports:{}};
 
-            var i = this.loading.push(name);
+            this.loading[name] = true;
             var f = new Function('require','module','exports', funcDef);
             f(requireOverride,module,module.exports);
-            this.loading.splice(i,1);
+            this.loading[name] = false;
 
             return module.exports;
         }
