@@ -1,21 +1,24 @@
 
+//var _ = require("./lodash");
 
 var REGISTRY = {
-	data:{},
-    has:function(){
+	debug:false,
+    data:{},
+    has:function(name){
+        this.debug && console.log("REGISTRY: checking "+name+" = " + !!this.data[name]);
         return !!this.data[name];
     },
     get:function(name){
-        !this.data.has(name) && this.load.apply(this,[].slice.call(arguments));
+        this.debug && console.log("REGISTRY: get "+name);
+        !this.has(name) && !!this["load"] && this.set(name,this.load.apply(this,[].slice.call(arguments)));
         return this.data[name];
     },
     set:function(name,value){
-        // store pair
+        this.debug && console.log("REGISTRY: set "+name);
         this.data[name] = value;
     },
-	load:function(name){
-		// override this to load data to registry
-	},
+	// implement this for cache self loading functionality
+    //load:function(){},
 	Factory:function(extension){
 		return _.extend({},this,extension);
 	}

@@ -4,7 +4,7 @@
 
 var Loader = {
     dir:"",
-    suffix:".js",
+    suffix:"",
     load:function load(name){
         var request = new XMLHttpRequest();
         var path = this.dir + name + this.suffix;
@@ -18,8 +18,11 @@ var Loader = {
         alert(msg);
         debugger;
         throw new Error(msg);
+    },
+    Factory:function(extension){
+        return _.extend({},this,extension);
     }
 };
 
-!!this["module"] && (module["exports"] = Loader);
+!!this["module"] && (module["exports"] = Loader.Factory);
 
