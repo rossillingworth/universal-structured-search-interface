@@ -1,22 +1,6 @@
 
-var Loader = {
-    dir:"",
-    suffix:".js",
-    load:function load(name){
-        var request = new XMLHttpRequest();
-        var path = this.dir + name + this.suffix;
-        console.log("loading: " + path);
-        request.open("GET",path,false);
-        request.send();
-        if(request.readyState == 4 && request.status == 200){
-            return request.responseText;
-        }
-        var msg = "Failed to load: " + path
-        alert(msg);
-        debugger;
-        throw new Error(msg);
-    }
-};
+//var REGISTRY = require("./REGISTRY");
+//var LOADER = require("./LOADER");
 
 
 function require(name,path){
@@ -27,19 +11,42 @@ function require(name,path){
     path = path || "";
     name = path + name;
 
-    var module = {};
-    var contents = Loader.load(name);
+    // initialise loading
+    !this.loading && (this.loading = []);
+    !this.cache && (this.cache = REGISTRY.Factory({
+        load:function(name,path){
 
+        }
+    }));
+
+    // check circular references
+    if(this.loading[name]){
+        throw new Error("Circular Reference: already loading " + name);
+    }
+
+    if(this.cache.has(name)){
+        console.log("require cache hit: " + name + " - " + path);
+        return this.cache.get(name);
+    }
+
+    var funcDef = Loader.load(name);
     var path = name.split("/").slice(0,-1).join("/") + "/";
-    var funcDef = JS.STRING.format("function require(name){return window.require(name,'%1')};",path);
 
-    funcDef += "\n" + contents;
-    console.log(funcDef);
+    funcDef += "//path: "+ path +"\n" + funcDef;
+    //console.log(funcDef);
 
-    var f = new Function('module', funcDef);
-    f(module);
+    var f = new Function('require','module', funcDef);
+    var r = function r(name){return require(name,path)};
+    var module = {};
+
+    var i = loading.push(name);
+    f(r,module);
+    loading.splice(i,1);
+
+    this.cache.set(name,module.exports);
 
     // return module exports
     return module.exports;
 
 }
+

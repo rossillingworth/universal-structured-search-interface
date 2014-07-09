@@ -5,3 +5,9 @@ browserify -t hbsfy main.js > bundle.js
 
 https://github.com/epeli/node-hbsfy
 
+
+{
+    1:[function(require,module,exports){},{}]
+    2:[function(require,module,exports){require("./dep")},{"./dep":1}]
+}
+
