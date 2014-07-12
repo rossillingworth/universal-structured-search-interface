@@ -2,24 +2,25 @@
  * Created by rillingworth on 05/07/14.
  */
 
-require("CLASS");
-require("SOVIET");
-require("TEMPLATES");
+//require("CLASS");
+//require("Maverick");
+//require("TEMPLATES");
 
-SOVIET.register([
-    {tag:"DDL",template:"TEMPLATE.DDL.VIEW",handler:"TEMPLATE.DDL.CLASS"}
-]);
+//MAVERICK.register([
+//    {tag:"DDL",template:"TEMPLATE.DDL.VIEW",handler:"TEMPLATE.DDL.CLASS"}
+//]);
+//
+//MAVERICK.register({tag:"DDL",template:"TEMPLATE.DDL.VIEW",handler:"TEMPLATE.DDL.CLASS"});
+//
+//MAVERICK.register("DDL","TEMPLATE.DDL.VIEW","TEMPLATE.DDL.CLASS");
+//MAVERICK.register("DDL","TEMPLATE.DDL.VIEW",TEMPLATE.DDL);
+//MAVERICK.register("DDL","TEMPLATE.DDL.VIEW",{});
+//
+//MAVERICK.register("OPTION",null,{}); // no template added, but handler used
 
-SOVIET.register({tag:"DDL",template:"TEMPLATE.DDL.VIEW",handler:"TEMPLATE.DDL.CLASS"});
 
-SOVIET.register("DDL","TEMPLATE.DDL.VIEW","TEMPLATE.DDL.CLASS");
-SOVIET.register("DDL","TEMPLATE.DDL.VIEW",TEMPLATE.DDL);
-SOVIET.register("DDL","TEMPLATE.DDL.VIEW",{});
-
-SOVIET.register("OPTION",null,{}); // no template added, but handler used
-
-
-var SOVIET = {
+var MAVERICK = {
+    debug:true,
     templateFactory:TemplateFactory.Factory({}),
     tags:{
         //demo:{templateName:"",handler:function(){}}
@@ -32,8 +33,6 @@ var SOVIET = {
      * @param handler Custom Controller (Constructor Function,Class JSON, or Name of Constructor)
      */
     register:function(tagName,templateName,handler){
-        // ensure template is loaded & cached
-        TemplateFactory.compile(templateName);
         // handler handler types
         switch(typeof handler){
             case "string":
@@ -48,16 +47,31 @@ var SOVIET = {
                 // perfect, is now a constructor
                 break;
         }
-        EXCEPTION.when(!_.isFunction(handler,"Handler is NOT a function"));
+        EXCEPTION.when(!_.isFunction(handler),"Handler is NOT a function");
         // store template
         this.tags[tagName] = {templateName:templateName,handler:handler};
+        debugger;
+    },
+    /**
+     * Check and compile any templates as required
+     * Needs to be run after DOM loaded, so called on start.
+     * If templates have been loaded in compiled form,
+     * will be very fast
+     */
+    compileTemplates:function(){
+        for(var name in this.tags){
+            var tName = this.tags[name].templateName;
+            this.debug && console.log("Checking template: " + tName);
+            TemplateFactory.compile(tName);
+        }
     },
     start:function(){
+        this.compileTemplates();
         if(arguments[0]==undefined){
             // iterate all identified top level dataTags
             var topLevelDataTags = document.getElementsByClassName("soviet")
             for(var dataTag in topLevelDataTags){
-                this.start(dataTag);
+                this.start(topLevelDataTags[dataTag]);
             }
         }else{
             var dataTag = JS.DOM.getElement(arguments[0],true);
@@ -68,7 +82,7 @@ var SOVIET = {
                 // TODO - should we remove dataTags fom DOM here?
                 targetContainer = JS.DOM.createElement("span",{},dataTag.parentNode);
             }
-            this.populate(dataTag,container);
+            this.populate(dataTag,targetContainer);
         }
     },
     /**
@@ -77,7 +91,7 @@ var SOVIET = {
     populate:function(dataTag,targetElement){
         // DbC & assignments
         var name = dataTag.tagName;
-        Exception.when(!this.tags[name],"Custom Tag[%s] has no registered Template/Handler",name);
+        EXCEPTION.when(!this.tags[name],"Custom Tag[%1] has no registered Handler/Template Pair",name);
         targetElement = JS.DOM.getElement(targetElement,true);
         // identify handler
         var pair = this.tags[name];
@@ -95,7 +109,7 @@ var SOVIET = {
         var container = JS.DOM.createElement("div",{innerHTML:html});
         // transfer DOM output to a document fragment
         var df = document.createDocumentFragment();
-        var childNodes =
+        var childNodes = [];
         for (var i in container.children) {
             var childNode = container.children[i];
             childNode && childNode.tagName && df.appendChild(childNode);
@@ -106,11 +120,11 @@ var SOVIET = {
         // now push document fragment to DOM
         targetElement.appendChild(df.cloneNode(true));
     }
-}
+};
 
 
 // TODO - move this to an underscore function?
-var SovietBase = {
+var MaverickBase = {
     components:{},
     children:[], // references to child handlers
     getBindReference:function(fragment,bindId){
@@ -123,11 +137,22 @@ var SovietBase = {
     }
 };
 
-<script>
-    <div id="" bindId="bind1">
-        <input type="text" bindId="">
-    </div>
-<script>
+
+MAVERICK.register("TEST","TEST",{
+    specification:{
+        name:"TestHandler",
+        extends:"MaverickBase"
+    },
+    constructor:function(){
+        alert("creating MaverickBase");
+    }
+});
+
+//<script>
+//    <div id="" bindId="bind1">
+//        <input type="text" bindId="">
+//    </div>
+//<script>
 
 
 // identify tag type
@@ -139,8 +164,8 @@ var SovietBase = {
 // when an event occurs...
 // DD node identifies dataTag selected
 
-// SOVIET.populate(dataTag,targetContainer,parentHandler) -> Handler Instance
-// SOVIET identifies template/Handler
+// MAVERICK.populate(dataTag,targetContainer,parentHandler) -> Handler Instance
+// MAVERICK identifies template/Handler
 // populate template {dataTag,Handler,UUID} into DF
 // run Handler.postProcess + bind event handlers
 // return Handler instance
@@ -162,10 +187,10 @@ var SovietBase = {
 // onChange
 //
 
-// SOVIET - trigger: populate DOM with View+Model, binds controller to DOM
+// MAVERICK - trigger: populate DOM with View+Model, binds controller to DOM
 // Data - configures Handler, + custom event bindings
 // Handler - configured by Model, controls view
 // View - changes trigger handler methods
 
 
-// TODO - onDomLoad="SOVIET.start();"
+// TODO - onDomLoad="MAVERICK.start();"

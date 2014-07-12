@@ -44,7 +44,9 @@ var CLASS = {
         function CONSTRUCTOR(){
             var args = [].slice.apply(arguments);
             console.log("Constructor for " + config.name + " called with ["+args.concat(",")+"]");
+            EXCEPTION.when(this.super == undefined,"error");
             config.allowParentConstructor && this.super.constructor.apply(this,args);
+            EXCEPTION.when(json == undefined,"error");
             !!json.constructor && json.constructor.apply(this,args);
         };
 
@@ -82,6 +84,7 @@ var CLASS = {
 
         // push CONSTRUCTOR to global namespace
         JS.OBJECT.setProperty(window,config.name,CONSTRUCTOR);
+        return CONSTRUCTOR;
     },
 
     /**

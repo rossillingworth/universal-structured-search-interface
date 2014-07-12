@@ -11,6 +11,8 @@
     </style>
     <script src="js/lodash.compat.js"></script>
     <script src="js/JS.js"></script>
+    <script src="js/cache.js"></script>
+    <script src="js/Loader.js"></script>
     <script src="js/TemplateFactory.js"></script>
     <script src="js/namedAnonFunc.js"></script>
 </head>
@@ -28,7 +30,7 @@
                                 <TEXT type="text" id="lastName"  label="Last Name"  required="true"    validation="required"  dataLocation="PNC.LastName"></TEXT>
                                 <!--<CIRCLE type="text" id="circle"  label="Circle"     required="false"    validation="required"  dataLocation="PNC.LastName"></CIRCLE>-->
                                 <!--<SVG-HTML id="SVG-HTML" required="false"></SVG-HTML>-->
-                                <LIST type="ddl"  id="sex"       label="Sex"        required="false"   validation="sex"        dataLocation="PNC.sex" list="male,female"></LIST>
+                                <!--<LIST type="ddl"  id="sex"       label="Sex"        required="false"   validation="sex"        dataLocation="PNC.sex" list="male,female"></LIST>-->
                                 <TEXT type="text" id="height"    label="Height"     required="false"   validation="sex"        dataLocation="PNC.sex"></TEXT>
                             </FORM>
                         </OPTION>
@@ -71,7 +73,7 @@
     function TLF_Factory(container,configContainerId,submitCallback){
 
         var choices = [];
-        var TlfTemplateFactory = TemplateFactory.getTemplateFactory({prefix:"template."});
+        var TlfTemplateFactory = TemplateFactory.Factory({prefix:"template."});
 
         var tlf = {
             identifier:"TLF",
@@ -182,8 +184,8 @@
     var mandatoryContainerId = "mandatory_" + uuid;
     var optionalContainerId = "optional_" + uuid;
     var childrenContainerId = "children_" + uuid;
-    var mandatoryChildren = _.findByAttribute(dataTag.children,"required","true");
-    var optionalChildren = _.findByAttribute(dataTag.children,"required","false");
+    var mandatoryChildren = _.filterByAttribute(dataTag.children,"required","true");
+    var optionalChildren = _.filterByAttribute(dataTag.children,"required","false");
     // build mandatory fields
     postProcessing.push(function(){
         var childContainer = JS.DOM.getElement(childrenContainerId);
@@ -214,6 +216,7 @@
                 <optgroup label="Optional Fields">
                     <%
                     _.forEach(optionalChildren,function(childDataTag){
+                        JS.ASSERT.is(childDataTag != undefined,true,"a problem");
                     %>
                         <option value="<%=childDataTag.id%>"><%=childDataTag.label%></option>
                     <%

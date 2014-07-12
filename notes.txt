@@ -62,3 +62,16 @@ Not suited for game applications
 NB:
 -----
 YOU CAN SAVE CANVAS AS PNG!!!
+
+
+
+Maverick
+===============
+
+reserve NPM / bower names
+push my small libs to NPM
+move maverick to using require
+
+translate templates to JSON definition
+? extend cache with Template Object in initialisation ???
+

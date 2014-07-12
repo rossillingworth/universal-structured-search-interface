@@ -7,15 +7,24 @@
 <script src="js/ExceptionExtensions.js"></script>
 <script src="js/JS.js"></script>
 <script src="js/class.js"></script>
+<script src="js/cache.js"></script>
 <script src="js/TemplateFactory.js"></script>
-<script src="js/soviet/soviet.js"></script>
+<script src="js/maverick/maverick.js"></script>
 
-<body onload="SOVIET.start()">
+<body onload="initMaverick();">
+<script>
+
+    function initMaverick(){
+
+        MAVERICK.start();
+    }
+
+</script>
 <p>
     Test DomDom
 </p>
 
-<test class="soviet" id="xxx" label="Goodbye Cruel World"></test>
+<TEST class="soviet" id="xxx" label="Goodbye Cruel World"></TEST>
 
 <OMNIBOX id="box1">
     <DDL id="dataSources" label="Data Sources">
@@ -54,7 +63,9 @@
     </DDL>
 </OMNIBOX>
 
-
+<script type="text/html" id="template.TEST">
+    <span>empty</span>
+</script>
 
 </body>
 </html>

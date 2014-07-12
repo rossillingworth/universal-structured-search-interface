@@ -9,7 +9,7 @@ var EXCEPTION = {
     ,debug:true
     ,when:function(condition,message){
         if(!!condition){
-            message = this.format(Array.prototype.slice.call(arguments,1));
+            message = this.format.apply(this,Array.prototype.slice.call(arguments,1));
             if(EXCEPTION.debug){
                 alert(message);
                 // if you have got here, you have a contract failure
@@ -26,6 +26,7 @@ var EXCEPTION = {
         // TODO - use to inform DEVs of errors in usage.
     }
     ,format:function(string) {
+        (arguments.length<1) && EXCEPTION.when(true,"Invalid Exception Arguments");
         var args = arguments;
         //alert("%([1-" + arguments.length + "])");
         var pattern = new RegExp("%([1-" + arguments.length + "])", "g");
