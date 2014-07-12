@@ -1,0 +1,16 @@
+
+
+JS classes
+================
+
+Contract Vs convention
+
+
+If a JS class is built with: new function ClassName(){}...
+then it will be properly autocompleted in IDEs
+
+If it is built using:
+John Resigs Class.extend({})
+My CLASS.register({})
+My Object.Factory({})
+... then it will NOT autocomplete properly.
