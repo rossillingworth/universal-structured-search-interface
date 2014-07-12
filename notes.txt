@@ -24,6 +24,33 @@ String code = "function doSomething() {\n" +
 "}";
 
 
+TODO - MVC
+-------------------------
+Model - XML / JSON
+View - Templates (local txt/html script element, remote file, pre-loaded func)
+Controller - Object / Constructor
+.......
+allow logic in templates for dev
+suggest move logic to Controllers for prod
+Allow any template library to be replaced - as long as it compiles to a func
+allow XML or JSON Model - modify templates & controllers to cope
+
+
+Todo - Model API
+-----------------
+create API for accessing model,
+which encapsulates XML vs JSON
+
+
+Todo - check features
+-----------------------------
+http://www.bearfruit.org/2014/01/20/node-js-template-showdown-5-options-compared/
+
+
+TODO - 9 patch SVG
+-----------------------
+build a configurable 9 patch SVG, ie: a button contanier
+
 Idea
 ------
 
