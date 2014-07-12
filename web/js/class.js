@@ -3,6 +3,8 @@
  * Author Ross Illingworth
  */
 
+!_ && (alert("lodash is missing, but required"));
+
 var CLASS = {
     // collection of constructor functions
     overrides:{},
@@ -43,9 +45,9 @@ var CLASS = {
          */
         function CONSTRUCTOR(){
             var args = [].slice.apply(arguments);
-            console.log("Constructor for " + config.name + " called with ["+args.concat(",")+"]");
-            EXCEPTION.when(this.super == undefined,"error");
-            config.allowParentConstructor && this.super.constructor.apply(this,args);
+            console.log("Constructor for " + config.name + " called with ["+(args.length)?args.concat(","):""+"]");
+            // Object has no prototype, so check for it
+            !!this.super && config.allowParentConstructor && this.super.constructor.apply(this,args);
             EXCEPTION.when(json == undefined,"error");
             !!json.constructor && json.constructor.apply(this,args);
         };
