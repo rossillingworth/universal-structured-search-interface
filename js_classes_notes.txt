@@ -14,3 +14,44 @@ John Resigs Class.extend({})
 My CLASS.register({})
 My Object.Factory({})
 ... then it will NOT autocomplete properly.
+
+
+
+Todo - shadow DOM
+---------------------
+could this be used to create Shadow Dom
+http://code.tutsplus.com/tutorials/intro-to-shadow-dom--net-34966
+
+onDomLoad
+- walk DOM tree
+- identify top level Custom/ModelNodes, ie: isCustomNode(tagName)
+- if active, replace with template/Controller
+....
+- check if children are custom nodes or DOM nodes
+- - if yes & active, replace...
+- - if NOT, inject elements into children location
+
+
+
+JSON version of XML
+-----------------------------------------------
+XML = <tagname attribute="">children...</tagname>
+JSON = ["tagname",{attributes},[children]]
+
+["tagName",{style:{},class:""},[
+    ["Child1tagName",{style:{},class:""},[]],
+    ["Child2tagName",{style:{},class:""},[]],
+    ["Child3tagName",{style:{},class:""},[]],
+]]
+
+? convert template function to allow XML.getAttribute as well ?
+
+see:
+http://www.jsonml.org/
+https://developer.mozilla.org/en/docs/JavaScript_templates
+https://plus.google.com/+WebcomponentsOrg/posts
+http://www.html5rocks.com/en/tutorials/webcomponents/customelements/
+http://www.polymer-project.org/platform/custom-elements.html
+
+
+

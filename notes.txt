@@ -1,4 +1,19 @@
 
+
+TODO - do it in XSLt
+------------------------
+http://johannburkard.de/software/xsltjs/
+
+is this a version of client side XSLt?
+ie: XML -> xHTML
+
+could it be replaced by client side XSLt?
+ie: XML -> xHTML, +grab bindings, set events.
+
+Could this be a CMS?
+runs on either server or client?
+
+
 Stuff to do
 -------
 TODO - for PROD: nodeJS compile HTML templates to Javascript Functions in CACHE
@@ -50,6 +65,12 @@ http://www.bearfruit.org/2014/01/20/node-js-template-showdown-5-options-compared
 TODO - 9 patch SVG
 -----------------------
 build a configurable 9 patch SVG, ie: a button contanier
+
+
+Todo - accessability?
+--------------------------
+how to make it accessable?
+
 
 Idea
 ------
