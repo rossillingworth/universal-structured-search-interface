@@ -50,7 +50,6 @@ var MAVERICK = {
         EXCEPTION.when(!_.isFunction(handler),"Handler is NOT a function");
         // store template
         this.tags[tagName] = {templateName:templateName,handler:handler};
-        debugger;
     },
     /**
      * Check and compile any templates as required
@@ -149,7 +148,7 @@ MAVERICK.register("TEST","TEST",{
         extends:"MaverickBase"
     },
     constructor:function(){
-        alert("creating MaverickBase");
+        console.log("creating Test Controller");
     }
 });
 
