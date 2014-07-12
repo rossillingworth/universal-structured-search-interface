@@ -2,6 +2,8 @@
  * Taken from: http://idiallo.com/blog/2014/01/dynamic-function-definition-in-js#b
  */
 
+// TODO - extend Cache, to record handlers and elements bound, so we can delete it later
+
 var Handler = (function (){
     var addEvent,
         removeEvent,
