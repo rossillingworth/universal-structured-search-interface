@@ -69,10 +69,14 @@ var MAVERICK = {
         this.compileTemplates();
         if(arguments[0]==undefined){
             // iterate all identified top level dataTags
-            var topLevelDataTags = document.getElementsByClassName("soviet")
-            for(var dataTag in topLevelDataTags){
-                this.start(topLevelDataTags[dataTag]);
+            var topLevelDataTags = document.getElementsByClassName("soviet");
+            topLevelDataTags = JS.ARRAY.fromCollection(topLevelDataTags);
+            for(var i = 0; i< topLevelDataTags.length; i++){
+                this.start(topLevelDataTags[i]);
             }
+//            for(var dataTag in topLevelDataTags){
+//                this.start(topLevelDataTags[dataTag]);
+//            }
         }else{
             var dataTag = JS.DOM.getElement(arguments[0],true);
             var targetContainer = null;
@@ -107,15 +111,16 @@ var MAVERICK = {
             postProcessing:postProcessing
         });
         var container = JS.DOM.createElement("div",{innerHTML:html});
+        var cLen = container.children.length;
         // transfer DOM output to a document fragment
         var df = document.createDocumentFragment();
         var childNodes = [];
-        for (var i in container.children) {
+        for(var i = 0; i < cLen; i++){
             var childNode = container.children[i];
             childNode && childNode.tagName && df.appendChild(childNode);
         }
         // do any post processing
-        hander.after(df);
+        !!handler.after && handler.after(df);
         _.forEach(postProcessing,function(func){func.apply()});
         // now push document fragment to DOM
         targetElement.appendChild(df.cloneNode(true));
