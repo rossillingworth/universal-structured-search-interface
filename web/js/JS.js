@@ -103,9 +103,9 @@ var JS = {
             return classElements;
         }
         /**
-         * Create an ELement and append it to Parent with properties
+         * Create an Element [with specified attributes] [and append it to Parent]
          * @param {Object} tagname Required eg: div, script, option
-         * @param {Object} [attribts] Optional, JSON format properties for element
+         * @param {Object} [attribts] Optional, JSON format attributes for element
          * @param {Object} [p] Optional, parent, if set element will be added to this
          */
         ,createElement:function(tagname,attribs,parent){
