@@ -21,7 +21,7 @@
 
 var MAVERICK = {
     debug:true,
-    templateFactory:TemplateFactory.Factory({}),
+    templateFactory:TemplateFactory.Factory({dir:"js/maverick/templates/",suffix:".ejs"}),
     tags:{
         //demo:{templateName:"",handler:function(){}}
     },
@@ -61,7 +61,7 @@ var MAVERICK = {
         for(var name in this.tags){
             var tName = this.tags[name].templateName;
             this.debug && console.log("Checking template: " + tName);
-            TemplateFactory.compile(tName);
+            this.templateFactory.compile(tName);
         }
     },
     start:function(){
@@ -105,7 +105,7 @@ var MAVERICK = {
         EXCEPTION.when(!(handler instanceof ControllerBase),"All handlers must be instances of ControllerBase.");
         var postProcessing = [];
         // push HTML to DOM node
-        var html = TemplateFactory.render(templateName,{
+        var html = this.templateFactory.render(templateName,{
             uuid: _.uniqueId(templateName),
             dataTag:dataTag,
             postProcessing:postProcessing

@@ -20,11 +20,11 @@ if(!(!!JS && !!_)){
  *
  */
 var TemplateFactory = Cache.Factory({
-    dir:"js/maverick/templates/",
+    dir:"",
     filePrefix:"",
-    suffix:".html",
+    suffix:".???",
     load:function(name){
-        !!this.loader && (this.loader = Loader.Factory({dir:this.dir,suffix:this.suffix}));
+        !this.loader && (this.loader = Loader.Factory({dir:this.dir,suffix:this.suffix}));
         var templateName = this.filePrefix + name;
         var templateElement = JS.DOM.getElement(templateName);
         var templateText = (!!templateElement)?templateElement.innerHTML:this.loader.load(templateName);
