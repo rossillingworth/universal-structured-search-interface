@@ -30,26 +30,26 @@ var MAVERICK = {
      *
      * @param tagName Name of TAG
      * @param templateName Name of View Template to use
-     * @param handler Custom Controller (Constructor Function,Class JSON, or Name of Constructor)
+     * @param controller Custom Controller (Constructor Function,Class JSON, or Name of Constructor)
      */
-    register:function(tagName,templateName,handler){
+    register:function(tagName,viewName,controller){
         // handler handler types
-        switch(typeof handler){
+        switch(typeof controller){
             case "string":
                 //
-                handler = JS.OBJECT.getProperty(window,handler);
+                controller = JS.OBJECT.getProperty(window,controller);
                 break;
             case "object":
                 // JSON object is a class definition
-                handler = CLASS.register(handler);
+                controller = CLASS.register(controller);
                 break;
             case "function":
                 // perfect, is now a constructor
                 break;
         }
-        EXCEPTION.when(!_.isFunction(handler),"Handler is NOT a function");
+        EXCEPTION.when(!_.isFunction(controller),"Handler is NOT a function");
         // store template
-        this.tags[tagName] = {templateName:templateName,handler:handler};
+        this.tags[tagName] = {viewName:viewName,controller:controller};
     },
     /**
      * Check and compile any templates as required
@@ -59,9 +59,9 @@ var MAVERICK = {
      */
     compileTemplates:function(){
         for(var name in this.tags){
-            var tName = this.tags[name].templateName;
-            this.debug && console.log("Checking template: " + tName);
-            this.templateFactory.compile(tName);
+            var vName = this.tags[name].viewName;
+            this.debug && console.log("Checking template: " + vName);
+            this.templateFactory.compile(vName);
         }
     },
     start:function(){
@@ -70,12 +70,9 @@ var MAVERICK = {
             // iterate all identified top level dataTags
             var topLevelDataTags = document.getElementsByClassName("maverickStart");
             topLevelDataTags = JS.ARRAY.fromCollection(topLevelDataTags);
-            for(var i = 0; i< topLevelDataTags.length; i++){
+            for(var i = 0, len = topLevelDataTags.length; i<len; i++){
                 this.start(topLevelDataTags[i]);
             }
-//            for(var dataTag in topLevelDataTags){
-//                this.start(topLevelDataTags[dataTag]);
-//            }
         }else{
             var dataTag = JS.DOM.getElement(arguments[0],true);
             var targetContainer = null;
@@ -91,46 +88,58 @@ var MAVERICK = {
     /**
      *
      */
-    populate:function(dataTag,targetElement){
+    populate:function(dataTag,targetElement,parentController){
+
         // DbC & assignments
         var name = dataTag.tagName;
         EXCEPTION.when(!this.tags[name],"Custom Tag[%1] has no registered Handler/Template Pair",name);
         targetElement = JS.DOM.getElement(targetElement,true);
+
         // identify handler
         var pair = this.tags[name];
-        var templateName = pair.templateName;
-        var handlerConstructor = pair.handler;
+
         // create handler instance
-        var handler = new handlerConstructor();
-        EXCEPTION.when(!(handler instanceof ControllerBase),"All handlers must be instances of ControllerBase.");
-        var postProcessing = [];
+        var controllerConstructor = pair.controller;
+        var controller = new controllerConstructor();
+        controller.dataTag = dataTag;
+        controller.parentController = parentController;
+        controller.targetElement = targetElement;
+        //parentController && parentController.childControllers.push(controller);
+        EXCEPTION.when(!(controller instanceof ControllerBase),"All handlers must be instances of ControllerBase.");
+
         // push HTML to DOM node
-        var html = this.templateFactory.render(templateName,{
-            uuid: _.uniqueId(templateName),
+        var viewName = pair.viewName;
+        var postProcessing = [];
+        var html = this.templateFactory.render(viewName,{
+            uuid: _.uniqueId(viewName),
             dataTag:dataTag,
             postProcessing:postProcessing
         });
         var container = JS.DOM.createElement("div",{innerHTML:html});
-        var cLen = container.children.length;
+
         // transfer DOM output to a document fragment
         var df = document.createDocumentFragment();
         var domComponents = [];
-        for(var i = 0; i < cLen; i++){
+        for(var i = 0, cLen = container.children.length; i < cLen; i++){
             var childNode = container.children[i];
             childNode && childNode.tagName && df.appendChild(childNode);
-            handler.domComponents.push(childNode);
+            controller.domComponents.push(childNode);
         }
+
         // do any template specified post processing
         _.forEach(postProcessing,function(func){func.apply()});
+
         // attach bindings
-        handler.attachTemplateBindings(df);
-        handler.checkExpectedBindingsAttached();
+        controller.attachTemplateBindings(df);
+        controller.checkExpectedBindingsAttached();
+
         // do controller post processing
-        handler.after(df);
+        controller.after(df);
+
         // now push document fragment to DOM
 //        targetElement.appendChild(df.cloneNode(true));  // this breaks bindings by cloning
         targetElement.appendChild(df);
-
+        return controller;
     }
 };
 

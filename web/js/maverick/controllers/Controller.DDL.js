@@ -16,16 +16,12 @@ MAVERICK.register("DDL","template.DDL",{
         Maverick.Events.add(this.bindings.select,"change",Maverick.Function.bind(this,this.optionChanged));
     },
     optionChanged:function(){
-        console.log("option changed");
-
-//        // remove all old descendants
-//        var container = JS.DOM.getElement(childrenContainerId);
-//        container.innerHTML = "";
-//        // get selected value
-//        var selectedValue = JS.DOM.FORM.getValue(this);
-//        // populate new child
-//        var childDataTag = dataTag.children.namedItem(selectedValue);
-//        tlf.populate(level+1,container,childDataTag)
+        // delete any existing child controller
+        this.deleteChildControllers();
+        var value = JS.DOM.FORM.getValue(this.bindings.select);
+        var selectedDataTag = this.dataTag.children.namedItem(value);
+        var childController = MAVERICK.populate(selectedDataTag,this.targetElement,this);
+        this.childControllers.push(childController);
     }
 });
 
