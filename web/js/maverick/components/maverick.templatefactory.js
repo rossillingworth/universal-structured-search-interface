@@ -20,7 +20,7 @@ if(!(!!JS && !!_)){
  *
  */
 var TemplateFactory = Cache.Factory({
-    dir:"js/templates/",
+    dir:"js/maverick/templates/",
     filePrefix:"",
     suffix:".html",
     load:function(name){

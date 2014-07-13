@@ -68,7 +68,7 @@ var MAVERICK = {
         this.compileTemplates();
         if(arguments[0]==undefined){
             // iterate all identified top level dataTags
-            var topLevelDataTags = document.getElementsByClassName("soviet");
+            var topLevelDataTags = document.getElementsByClassName("maverickStart");
             topLevelDataTags = JS.ARRAY.fromCollection(topLevelDataTags);
             for(var i = 0; i< topLevelDataTags.length; i++){
                 this.start(topLevelDataTags[i]);
@@ -102,6 +102,7 @@ var MAVERICK = {
         var handlerConstructor = pair.handler;
         // create handler instance
         var handler = new handlerConstructor();
+        EXCEPTION.when(!(handler instanceof ControllerBase),"All handlers must be instances of ControllerBase.");
         var postProcessing = [];
         // push HTML to DOM node
         var html = TemplateFactory.render(templateName,{
