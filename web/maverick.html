@@ -10,6 +10,7 @@
 <script src="js/maverick/components/maverick.events.js"></script>
 <script src="js/maverick/components/maverick.cache.js"></script>
 <script src="js/maverick/components/maverick.templatefactory.js"></script>
+<script src="js/maverick/components/maverick.function.js"></script>
 <script src="js/maverick/maverick.js"></script>
 <script src="js/maverick/controllers/Controller.Base.js"></script>
 <script src="js/maverick/controllers/Controller.Test.js"></script>
@@ -29,8 +30,8 @@
 
 <TEST class="soviet" id="xxx" label="Goodbye Cruel World"></TEST>
 
-<OMNIBOX id="box1">
-    <DDL id="dataSources" label="Data Sources">
+
+    <DDL id="dataSources" label="Data Sources" class="maverickStart">
         <OPTION id="ZNC" label="ZNC">
             <DDL id="objects" label="Object">
                 <OPTION id="Nominal" label="Nominal">
@@ -64,7 +65,7 @@
             <EMPTY></EMPTY>
         </OPTION>
     </DDL>
-</OMNIBOX>
+
 
 <script type="text/html" id="template.TEST">
     <input type="button" value="Go" bind="button1">

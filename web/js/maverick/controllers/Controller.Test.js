@@ -13,10 +13,7 @@ MAVERICK.register("TEST","template.TEST",{
         console.log("creating Test Controller");
     },
     after:function after(df){
-        Maverick.Events.add(this.bindings.button1,"click",function(){
-            console.log("button1 clicked");
-            this.test();
-        });
+        Maverick.Events.add(this.bindings.button1,"click",Maverick.Function.bind(this,this.test));
     },
     test:function(){
         console.log("button1 clicked");
