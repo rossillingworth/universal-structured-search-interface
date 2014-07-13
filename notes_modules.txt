@@ -1,0 +1,38 @@
+
+
+NPM / Grunt / Bower / etc...
+
+maverick.events
+or
+maverick-events
+
+
+shared modules & singletons
+
+#############
+
+
+// conditional require (if present)
+!!require && (var _ = require("lodash"));
+
+// if maverick is global will continue
+// else will create local object
+maverick = maverick || {};
+maverick.events = {
+	.....
+};
+
+// conditional export (if present)
+!!module && (module.exports = maverick.events);
+
+
+
+######################
+
+load in order
+fundamentals first
+
+lodash
+JS
+require
+...
