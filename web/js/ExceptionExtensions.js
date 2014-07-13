@@ -19,11 +19,22 @@ var EXCEPTION = {
             throw new Error(message);
         }
     }
-    ,debugIf:function(){
-        // TODO - should we include this
-        // TODO - always DEBUGGER if this is triggered
-        // TODO - ie: DEV time failure, and never allowed
-        // TODO - use to inform DEVs of errors in usage.
+    /**
+     * Use this for a gauranteed dev time failure.
+     * eg: bad arguments etc
+     *
+     * @param condition
+     * @param message
+     */
+    ,debugWhen:function(condition,message/*,varargs*/){
+        if(!!condition){
+            message = this.format.apply(this,Array.prototype.slice.call(arguments,1));
+            alert(message);
+            // if you have got here, you have a contract failure
+            // Use your debugger stack trace to identify the cause
+            debugger;
+            throw new Error(message);
+        }
     }
     ,format:function(string) {
         (arguments.length<1) && EXCEPTION.when(true,"Invalid Exception Arguments");

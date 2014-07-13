@@ -188,8 +188,7 @@ MAVERICK.register("TEST","template.TEST",{
         console.log("creating Test Controller");
     },
     after:function after(df){
-        console.log("Test Controller processing after df populated");
-        EVENTS.addEvent(this.bindings.button1,"click",function(){
+        Maverick.Events.add(this.bindings.button1,"click",function(){
             console.log("button1 clicked");
             this.test();
         });
@@ -199,7 +198,6 @@ MAVERICK.register("TEST","template.TEST",{
     }
 });
 
-debugger;
 
 //<script>
 //    <div id="" bindId="bind1">

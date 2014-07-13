@@ -51,8 +51,8 @@ var CLASS = {
             var args = [].slice.apply(arguments);
             console.log("Constructor for " + config.name + " called with ["+(args.length)?args.concat(","):""+"]");
             // Object has no prototype, so check for it
+            // TODO - should this be automatically called?
             config.allowParentConstructor && !!this.super && this.super.constructor && this.super.constructor.apply(this,args);
-            EXCEPTION.when(json == undefined,"error");
             !!json.constructor && json.constructor.apply(this,args);
         };
 
