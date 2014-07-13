@@ -22,11 +22,6 @@ var CLASS = {
 
         var config = _.extend({},this.specificationDefaults,json.specification);
 
-        // get base class constructor
-        var baseName = config.extends;
-        var baseConstructor = JS.OBJECT.getProperty(window,baseName);
-        EXCEPTION.when(!!baseName && !(!!baseConstructor),"No base instance of %s",baseName);
-
         /**
          * Intermediary PROTOTYPE container
          * Provides container for object prototype methods
@@ -37,9 +32,15 @@ var CLASS = {
             console.log("Inheriting from " + this.prototype + " to " + config.name);
         };
 
-        // handle function or object prototype
-        !!baseConstructor && _.isObject(baseConstructor) && (PROTOTYPE.prototype = baseConstructor);
-        !!baseConstructor && _.isFunction(baseConstructor) && (PROTOTYPE.prototype = baseConstructor.prototype);
+        // identify prototype
+        if(config.extends){
+            var baseConstructor = JS.OBJECT.getProperty(window,config.extends);
+            EXCEPTION.when(!baseConstructor,"Unable to find %s.",config.extends);
+            _.isObject(baseConstructor) && (PROTOTYPE.prototype = baseConstructor);
+            _.isFunction(baseConstructor) && (PROTOTYPE.prototype = baseConstructor.prototype);
+        }else{
+            PROTOTYPE.prototype = Object.prototype;
+        }
 
         /**
          * Constructor for our class
@@ -65,7 +66,7 @@ var CLASS = {
 //        PROTOTYPE.prototype = baseConstructor ? baseConstructor.prototype : config.underlyingPrototype;
         CONSTRUCTOR.prototype = new PROTOTYPE();
         CONSTRUCTOR.prototype.constructor = CONSTRUCTOR;
-        CONSTRUCTOR.prototype.super = PROTOTYPE.prototype;
+        //CONSTRUCTOR.prototype.super = PROTOTYPE.prototype;
 
         // decorate constructor with specified mixins
         if(config.mixins && config.mixins.length > 0){
