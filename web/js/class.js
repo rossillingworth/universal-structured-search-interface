@@ -37,6 +37,10 @@ var CLASS = {
             console.log("Inheriting from " + this.prototype + " to " + config.name);
         };
 
+        // handle function or object prototype
+        !!baseConstructor && _.isObject(baseConstructor) && (PROTOTYPE.prototype = baseConstructor);
+        !!baseConstructor && _.isFunction(baseConstructor) && (PROTOTYPE.prototype = baseConstructor.prototype);
+
         /**
          * Constructor for our class
          * Will call parent constructor chain
@@ -47,7 +51,7 @@ var CLASS = {
             var args = [].slice.apply(arguments);
             console.log("Constructor for " + config.name + " called with ["+(args.length)?args.concat(","):""+"]");
             // Object has no prototype, so check for it
-            !!this.super && config.allowParentConstructor && this.super.constructor.apply(this,args);
+            config.allowParentConstructor && !!this.super && this.super.constructor && this.super.constructor.apply(this,args);
             EXCEPTION.when(json == undefined,"error");
             !!json.constructor && json.constructor.apply(this,args);
         };
@@ -55,7 +59,10 @@ var CLASS = {
         // assign (base prototype or Object.prototype) to our intermediary prototype
         // inherit baseConstructor prototype without creating an instance on baseConstructor
         // this is also done to avoid polluting the baseConstructor.prototype
-        PROTOTYPE.prototype = baseConstructor ? baseConstructor.prototype : config.underlyingPrototype;
+
+
+
+//        PROTOTYPE.prototype = baseConstructor ? baseConstructor.prototype : config.underlyingPrototype;
         CONSTRUCTOR.prototype = new PROTOTYPE();
         CONSTRUCTOR.prototype.constructor = CONSTRUCTOR;
         CONSTRUCTOR.prototype.super = PROTOTYPE.prototype;

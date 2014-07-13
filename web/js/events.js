@@ -4,7 +4,7 @@
 
 // TODO - extend Cache, to record handlers and elements bound, so we can delete it later
 
-var Handler = (function (){
+var EVENTS = (function (){
     var addEvent,
         removeEvent,
         hand = {},

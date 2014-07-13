@@ -21,7 +21,7 @@ if(!(!!JS && !!_)){
  */
 var TemplateFactory = Cache.Factory({
     dir:"js/templates/",
-    filePrefix:"template.",
+    filePrefix:"",
     suffix:".html",
     load:function(name){
         !!this.loader && (this.loader = Loader.Factory({dir:this.dir,suffix:this.suffix}));
