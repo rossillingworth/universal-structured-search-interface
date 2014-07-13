@@ -127,7 +127,9 @@ var MAVERICK = {
         // do controller post processing
         handler.after(df);
         // now push document fragment to DOM
-        targetElement.appendChild(df.cloneNode(true));
+//        targetElement.appendChild(df.cloneNode(true));  // this breaks bindings by cloning
+        targetElement.appendChild(df);
+
     }
 };
 
@@ -180,15 +182,20 @@ MAVERICK.register("TEST","template.TEST",{
     },
     // put your expected bindings here
     bindings:{
-        button:null
+        button1:null
     },
     constructor:function(){
         console.log("creating Test Controller");
     },
     after:function after(df){
         console.log("Test Controller processing after df populated");
-        //EVENTS.addEvent(this.bindings.button)
-
+        EVENTS.addEvent(this.bindings.button1,"click",function(){
+            console.log("button1 clicked");
+            this.test();
+        });
+    },
+    test:function(){
+        console.log("button1 clicked");
     }
 });
 
