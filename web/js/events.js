@@ -5,25 +5,40 @@
 // TODO - extend Cache, to record handlers and elements bound, so we can delete it later
 
 var EVENTS = (function (){
-    var addEvent,
-        removeEvent,
-        hand = {},
-        on = "",
-        attach = "attachEvent",
-        detach = "detachEvent";
-    if(window.attachEvent){
-        on = "on";
-    }else {
-        attach = "addEventListener";
-        detach = "removeEventListener";
-    }
-    addEvent = function (elem,event,func){
+    var cache = {};
+    var hand = {},
+        on = (window.attachEvent)?"on":"",
+        attach = (window.attachEvent)?"attachEvent":"addEventListener",
+        detach = (window.attachEvent)?"detachEvent":"removeEventListener";
+    var addEvent = function (elem,event,func){
         elem[attach](on+event,func,false); // bubbling will be ignored in IE
+        !cache[elem] && (cache[elem]={});
+        !cache[elem][event] && (cache[elem][event]=[]);
+        cache[elem][event].push(func);
     };
-    removeEvent = function (elem,event,func){
+    var removeEvent = function (elem,event,func){
         elem[detach](on+event,func);
+        var ind = cache[elem][event].indexOf(func);
+        cache[elem][event].splice(ind,1);
     };
-    hand.addEvent = addEvent;
-    hand.removeEvent = removeEvent;
-    return hand;
+    /**
+     * TODO - verify it works
+     * @param elem
+     * @param event
+     */
+    var clear = function(elem,event){
+        var events = cache[elem];
+        for(var eventName in events){
+            if(!event || eventName == event){
+                while(cache[elem][eventName].length > 0){
+                    removeEvent(elem,eventName,cache[elem][eventName][0]);
+                }
+            }
+        }
+    };
+    return {
+        addEvent:addEvent,
+        removeEvent:removeEvent,
+        clear:clear
+    };
 })();
