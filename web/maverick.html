@@ -12,6 +12,7 @@
 <script src="js/maverick/components/maverick.templatefactory.js"></script>
 <script src="js/maverick/components/maverick.function.js"></script>
 <script src="js/maverick/components/maverick.loader.js"></script>
+<script src="js/maverick/components/maverick.when.js"></script>
 <script src="js/maverick/maverick.js"></script>
 <script src="js/maverick/controllers/Controller.Base.js"></script>
 <script src="js/maverick/controllers/Controller.Test.js"></script>
@@ -73,6 +74,15 @@
 
 <script type="text/html" id="template.TEST">
     <input type="button" value="Go" bind="button1">
+</script>
+
+<script>
+
+    (function test1(){
+        when(true) && and("true") && then(function(){alert("busted")});
+    })()
+
+
 </script>
 
 </body>
