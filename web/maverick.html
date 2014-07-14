@@ -36,40 +36,40 @@
 <TEST class="soviet" id="xxx" label="Goodbye Cruel World"></TEST>
 
 
-    <DDL id="dataSources" label="Data Sources" class="maverickStart">
-        <OPTION id="ZNC" label="ZNC">
-            <DDL id="objects" label="Object">
-                <OPTION id="Nominal" label="Nominal">
-                    <DDL id="Queries" label="How">
-                        <OPTION id="BYNAME" label="by Name">
-                            <FORM>
-                                <TEXT type="text" id="firstName" label="First Name" required="true"    validation="required"  dataLocation="PNC.firstName"></TEXT>
-                                <TEXT type="text" id="lastName"  label="Last Name"  required="true"    validation="required"  dataLocation="PNC.LastName"></TEXT>
-                                <!--<CIRCLE type="text" id="circle"  label="Circle"     required="false"    validation="required"  dataLocation="PNC.LastName"></CIRCLE>-->
-                                <!--<SVG-HTML id="SVG-HTML" required="false"></SVG-HTML>-->
-                                <LIST type="ddl"  id="sex"       label="Sex"        required="false"   validation="sex"        dataLocation="PNC.sex" list="male,female"></LIST>
-                                <TEXT type="text" id="height"    label="Height"     required="false"   validation="sex"        dataLocation="PNC.sex"></TEXT>
-                            </FORM>
-                        </OPTION>
-                        <OPTION id="byID" label="by Id">
-                            <FORM>
-                                <FIELD id="ZNC-ID" label="ZNC ID" manditory="true" validation="required,isZncId"/>
-                            </FORM>
-                        </OPTION>
-                    </DDL>
-                </OPTION>
-                <OPTION id="Vehicle" label="Vehicle">
-                    <DDL></DDL>
-                </OPTION>
-            </DDL>
-        </OPTION>
-        <OPTION id="ZOLE" label="Zole">
-            <EMPTY></EMPTY>
-        </OPTION>
-        <OPTION id="zvla" label="ZVLA">
-            <EMPTY></EMPTY>
-        </OPTION>
-    </DDL>
+<DDL id="dataSources" label="Data Sources" class="maverickStart">
+    <OPTION id="ZNC" label="ZNC">
+        <DDL id="objects" label="Object">
+            <OPTION id="Nominal" label="Nominal">
+                <DDL id="Queries" label="How">
+                    <OPTION id="BYNAME" label="by Name">
+                        <FORM>
+                            <TEXT type="text" id="firstName" label="First Name" required="true"    validation="required"  dataLocation="PNC.firstName"></TEXT>
+                            <TEXT type="text" id="lastName"  label="Last Name"  required="true"    validation="required"  dataLocation="PNC.LastName"></TEXT>
+                            <!--<CIRCLE type="text" id="circle"  label="Circle"     required="false"    validation="required"  dataLocation="PNC.LastName"></CIRCLE>-->
+                            <!--<SVG-HTML id="SVG-HTML" required="false"></SVG-HTML>-->
+                            <LIST type="ddl"  id="sex"       label="Sex"        required="false"   validation="sex"        dataLocation="PNC.sex" list="male,female"></LIST>
+                            <TEXT type="text" id="height"    label="Height"     required="false"   validation="sex"        dataLocation="PNC.sex"></TEXT>
+                        </FORM>
+                    </OPTION>
+                    <OPTION id="byID" label="by Id">
+                        <FORM>
+                            <FIELD id="ZNC-ID" label="ZNC ID" manditory="true" validation="required,isZncId"/>
+                        </FORM>
+                    </OPTION>
+                </DDL>
+            </OPTION>
+            <OPTION id="Vehicle" label="Vehicle">
+                <DDL></DDL>
+            </OPTION>
+        </DDL>
+    </OPTION>
+    <OPTION id="ZOLE" label="Zole">
+        <EMPTY></EMPTY>
+    </OPTION>
+    <OPTION id="zvla" label="ZVLA">
+        <EMPTY></EMPTY>
+    </OPTION>
+</DDL>
 
 
 <script type="text/html" id="template.TEST">
@@ -79,8 +79,18 @@
 <script>
 
     (function test1(){
-        when(true) && and("true") && then(function(){alert("busted")});
+        var a = "aaa";
+        when(true) && and("true") && then(function(){console.log("busted")});
+        when(true) && ((function(){a="bbbbb";})());
+        when(false) && ((function(){a="ccccc";})());
+
+        when(true)(function(){});
+        when(true).and(0==1).and().then(function(){});
+        start(this).when(true).and(0==1).or(true).and().then(function(){});
+
+        console.log(a);
     })()
+
 
 
 </script>
