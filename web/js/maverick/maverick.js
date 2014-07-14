@@ -91,6 +91,7 @@ var MAVERICK = {
     populate:function(dataTag,targetElement,parentController){
 
         // DbC & assignments
+        EXCEPTION.when(!dataTag,"Data must be populated");
         var name = dataTag.tagName;
         EXCEPTION.when(!this.tags[name],"Custom Tag[%1] has no registered Handler/Template Pair",name);
         targetElement = JS.DOM.getElement(targetElement,true);
@@ -104,8 +105,14 @@ var MAVERICK = {
         controller.dataTag = dataTag;
         controller.parentController = parentController;
         controller.targetElement = targetElement;
-        //parentController && parentController.childControllers.push(controller);
         EXCEPTION.when(!(controller instanceof ControllerBase),"All handlers must be instances of ControllerBase.");
+
+        // init arrays to avoid pollution
+        controller.domComponents = [];
+        controller.childControllers = [];
+
+        // push controller to parent array
+        !!parentController && parentController.childControllers.push(controller);
 
         // push HTML to DOM node
         var viewName = pair.viewName;
@@ -117,13 +124,11 @@ var MAVERICK = {
         });
         var container = JS.DOM.createElement("div",{innerHTML:html});
 
-        // transfer DOM output to a document fragment
+        // transfer DOM output to a document fragment, store references in controller
         var df = document.createDocumentFragment();
-        var domComponents = [];
-        for(var i = 0, cLen = container.children.length; i < cLen; i++){
-            var childNode = container.children[i];
-            childNode && childNode.tagName && df.appendChild(childNode);
-            controller.domComponents.push(childNode);
+        while(container.children.length > 0){
+            var childNode = container.children[0];
+            controller.addDomComponent(df.appendChild(childNode));
         }
 
         // do any template specified post processing

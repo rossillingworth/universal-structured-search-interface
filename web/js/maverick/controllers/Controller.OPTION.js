@@ -13,6 +13,9 @@ MAVERICK.register("OPTION","template.OPTION",{
     after:function after(df){
         var childDataTag = this.dataTag.children[0];
         MAVERICK.populate(childDataTag,this.targetElement,this);
+        (this.testArray == null) && (this.testArray = []);
+        this.testArray.push(_.uniqueId("OPTION"));
+//        debugger;
     }
 });
 
