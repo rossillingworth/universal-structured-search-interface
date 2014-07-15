@@ -19,6 +19,8 @@
 <script src="js/maverick/controllers/Controller.DDL.js"></script>
 <script src="js/maverick/controllers/Controller.OPTION.js"></script>
 <script src="js/maverick/controllers/Controller.EMPTY.js"></script>
+<script src="js/maverick/controllers/Controller.FORM.js"></script>
+<script src="js/maverick/controllers/Controller.TEXT.js"></script>
 
 <body onload="initMaverick();">
 <script>
@@ -43,17 +45,17 @@
                 <DDL id="Queries" label="How">
                     <OPTION id="BYNAME" label="by Name">
                         <FORM>
-                            <TEXT type="text" id="firstName" label="First Name" required="true"    validation="required"  dataLocation="PNC.firstName"></TEXT>
-                            <TEXT type="text" id="lastName"  label="Last Name"  required="true"    validation="required"  dataLocation="PNC.LastName"></TEXT>
+                            <TEXT type="text" id="firstName" label="First Name" required="true"    validators="required"  dataLocation="PNC.firstName"></TEXT>
+                            <TEXT type="text" id="lastName"  label="Last Name"  required="true"    validators="required"  dataLocation="PNC.LastName"></TEXT>
                             <!--<CIRCLE type="text" id="circle"  label="Circle"     required="false"    validation="required"  dataLocation="PNC.LastName"></CIRCLE>-->
                             <!--<SVG-HTML id="SVG-HTML" required="false"></SVG-HTML>-->
-                            <LIST type="ddl"  id="sex"       label="Sex"        required="false"   validation="sex"        dataLocation="PNC.sex" list="male,female"></LIST>
-                            <TEXT type="text" id="height"    label="Height"     required="false"   validation="sex"        dataLocation="PNC.sex"></TEXT>
+                            <!--<LIST type="ddl"  id="sex"       label="Sex"        required="false"   validation="sex"        dataLocation="PNC.sex" list="male,female"></LIST>-->
+                            <TEXT type="text" id="height"    label="Height"     required="false"   validators="sex"        dataLocation="PNC.sex"></TEXT>
                         </FORM>
                     </OPTION>
                     <OPTION id="byID" label="by Id">
                         <FORM>
-                            <FIELD id="ZNC-ID" label="ZNC ID" manditory="true" validation="required,isZncId"/>
+                            <FIELD id="ZNC-ID" label="ZNC ID" manditory="true" validators="required,isZncId"/>
                         </FORM>
                     </OPTION>
                 </DDL>

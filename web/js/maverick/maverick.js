@@ -25,6 +25,7 @@ var MAVERICK = {
     tags:{
         //demo:{templateName:"",handler:function(){}}
     },
+    validators:{},
     /**
      * Register a custom TAG
      *
@@ -50,6 +51,9 @@ var MAVERICK = {
         EXCEPTION.when(!_.isFunction(controller),"Handler is NOT a function");
         // store template
         this.tags[tagName] = {viewName:viewName,controller:controller};
+    },
+    registerValidator:function(name,func){
+        this.validators[name] = func;
     },
     /**
      * Check and compile any templates as required

@@ -23,6 +23,7 @@ CLASS.register({
         for (var i = 0, len = nodes.length; i < len; i++) {
             if (nodes[i].hasAttribute("bind")) {
                 var bindingName = nodes[i].getAttribute("bind");
+                EXCEPTION.when(!this.bindings.hasOwnProperty(bindingName),"Binding '%1' has not been specified in the constructor for %2.",bindingName,this.specification.name);
                 this.bindings[bindingName] = nodes[i];
             }
         }
