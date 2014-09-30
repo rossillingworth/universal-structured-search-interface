@@ -1,11 +1,23 @@
 universal-structured-search-interface
 =====================================
 
-a way of identifying structured search co-ordinates: where you are looking for data, what you are looking for, how you want to search for it
+a way of identifying structured search co-ordinates: 
+where you are looking for data
+what you are looking for
+how you want to search for it
 
-FYI: this is MPL licensed - so all modifications will inherit an OSS license.
+Introducing Maverick (MVC)
+==============
+In creating this, I have refactored it into a new Web-ELements type API.
+- Construct classes with inheritance
+- XML data elements in the page
+- Template replacement
+- Could be client or server side
+
+
+License
+============
+
+This is MPL licensed - and all modifications will inherit an MPL license.
 ie: they can be copied by anyone.
-
-This is to stop companies extending this and claiming it belongs to them.
-Especially as javascript is all publicly available anyway.
 
